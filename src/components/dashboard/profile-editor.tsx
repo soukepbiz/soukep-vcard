@@ -93,7 +93,16 @@ export function ProfileEditor({ profile: initialProfile }: ProfileEditorProps) {
           <label className="flex items-center gap-2 cursor-pointer">
             <span className="text-sm text-gray-600">Publier</span>
             <div
-              onClick={() => update('is_published', !profile.is_published)}
+              onClick={async () => {
+                const newVal = !profile.is_published
+                update('is_published', newVal)
+                await fetch('/api/profile', {
+                  method: 'PATCH',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ is_published: newVal }),
+                })
+                startTransition(() => router.refresh())
+              }}
               className={`relative w-11 h-6 rounded-full transition-colors ${
                 profile.is_published ? 'bg-[#0099FF]' : 'bg-gray-200'
               }`}
@@ -229,7 +238,7 @@ export function ProfileEditor({ profile: initialProfile }: ProfileEditorProps) {
               ))}
               <button
                 type="button"
-                onClick={() => update('phone_numbers', [...profile.phone_numbers, { id: nanoid(), label: 'Travail', number: '', order: profile.phone_numbers.length }])}
+                onClick={() => update('phone_numbers', [...profile.phone_numbers, { id: nanoid(), label: 'Professionnel', number: '', order: profile.phone_numbers.length }])}
                 className="flex items-center gap-2 h-9 text-sm text-[#0099FF] hover:underline"
               >
                 + Ajouter un téléphone
