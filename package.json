@@ -9,12 +9,28 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@hello-pangea/dnd": "^18.0.1",
+    "@stripe/stripe-js": "^9.4.0",
+    "@supabase/ssr": "^0.10.3",
+    "@supabase/supabase-js": "^2.105.4",
+    "clsx": "^2.1.1",
+    "colorthief": "^3.3.1",
+    "framer-motion": "^12.38.0",
+    "lucide-react": "^1.14.0",
+    "nanoid": "^5.1.11",
     "next": "16.2.6",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-colorful": "^5.7.0",
+    "react-dom": "19.2.4",
+    "recharts": "^3.8.1",
+    "simple-icons": "^16.19.0",
+    "stripe": "^22.1.1",
+    "tailwind-merge": "^3.6.0",
+    "vcf": "^2.1.2"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/colorthief": "^2.6.1",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
