@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Prevent @supabase/ssr from being bundled — avoids module resolution issues on Vercel
+  serverExternalPackages: ['@supabase/ssr'],
   images: {
     remotePatterns: [
       {

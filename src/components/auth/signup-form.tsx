@@ -17,17 +17,29 @@ export function SignupForm() {
   const strengthLabel = ['', 'Faible', 'Correct', 'Fort']
   const strengthColor = ['', 'bg-red-400', 'bg-amber-400', 'bg-emerald-500']
 
+  function translateError(msg: string): string {
+    if (msg.includes('already registered') || msg.includes('already been registered')) return 'Cette adresse email est déjà utilisée. Essayez de vous connecter.'
+    if (msg.includes('Invalid email')) return 'Adresse email invalide.'
+    if (msg.includes('Password should be')) return 'Le mot de passe doit contenir au moins 6 caractères.'
+    if (msg.includes('rate limit') || msg.includes('too many')) return 'Trop de tentatives. Veuillez réessayer dans quelques minutes.'
+    if (msg.includes('Unable to validate') || msg.includes('signup is disabled')) return "Les inscriptions sont désactivées pour le moment."
+    return msg
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
     setLoading(true)
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: { emailRedirectTo: `${window.location.origin}/api/auth/callback` },
     })
     if (error) {
-      setError(error.message)
+      setError(translateError(error.message))
+    } else if (data.user && data.session) {
+      // Email confirmation disabled — user is directly logged in
+      window.location.href = '/dashboard'
     } else {
       setSuccess(true)
     }
