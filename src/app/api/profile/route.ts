@@ -20,9 +20,10 @@ export async function PATCH(request: Request) {
     .eq('id', user.id)
     .single()
 
-  const premium = currentProfile
+  const devPremium = process.env.NEXT_PUBLIC_DEV_PREMIUM === 'true'
+  const premium = devPremium || (currentProfile
     ? isPremium(currentProfile.subscription_type, currentProfile.subscription_expires_at)
-    : false
+    : false)
 
   const maxLinks = premium ? TIER_LIMITS.premium.maxLinks : TIER_LIMITS.free.maxLinks
 

@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   phone_numbers           JSONB DEFAULT '[]'::jsonb,
   emails                  JSONB DEFAULT '[]'::jsonb,
   location                TEXT,
-  accent_color            TEXT DEFAULT '#6366F1',
+  accent_color            TEXT DEFAULT '#0099FF',
   is_published            BOOLEAN DEFAULT false,
   subscription_type       TEXT DEFAULT 'free' CHECK (subscription_type IN ('free','premium','lifetime')),
   subscription_expires_at TIMESTAMPTZ,

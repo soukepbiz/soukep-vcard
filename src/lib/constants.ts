@@ -29,8 +29,8 @@ export const SOCIAL_PLATFORMS = [
   { id: 'telegram', label: 'Telegram', icon: 'telegram', color: '#26A5E4' },
   { id: 'whatsapp', label: 'WhatsApp', icon: 'whatsapp', color: '#25D366' },
   { id: 'github', label: 'GitHub', icon: 'github', color: '#181717' },
-  { id: 'website', label: 'Site Web', icon: 'globe', color: '#6366F1' },
+  { id: 'website', label: 'Site Web', icon: 'globe', color: '#0099FF' },
   { id: 'custom', label: 'Lien personnalisé', icon: 'link', color: '#6B7280' },
 ] as const
 
-export const DEFAULT_ACCENT_COLOR = '#6366F1'
+export const DEFAULT_ACCENT_COLOR = '#0099FF'

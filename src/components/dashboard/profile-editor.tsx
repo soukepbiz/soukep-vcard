@@ -270,7 +270,7 @@ export function ProfileEditor({ profile: initialProfile }: ProfileEditorProps) {
 
       {tab === 'theme' && (
         <ThemeEditor
-          accentColor={profile.accent_color || '#6366F1'}
+          accentColor={profile.accent_color || '#0099FF'}
           onChange={(color) => update('accent_color', color)}
           isPremium={premium}
           extractedColor={extractedColor}
