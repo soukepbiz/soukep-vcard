@@ -5,18 +5,24 @@ interface ProfileHeaderProps {
   profile: Profile
 }
 
+// Normalize legacy purple to brand blue
+function resolveAccent(color: string | null) {
+  if (!color || color === '#6366F1') return '#0099FF'
+  return color
+}
+
 export function ProfileHeader({ profile }: ProfileHeaderProps) {
-  const accent = profile.accent_color || '#0099FF'
+  const accent = resolveAccent(profile.accent_color)
 
   return (
-    <div className="relative">
-      {/* Cover */}
+    <div className="relative px-3 pt-3">
+      {/* Cover with rounded corners */}
       <div
-        className="h-48 w-full overflow-hidden"
+        className="h-44 w-full overflow-hidden rounded-2xl"
         style={
           profile.cover_url
             ? undefined
-            : { background: `linear-gradient(135deg, ${accent}CC 0%, ${accent}66 50%, ${accent}22 100%)` }
+            : { background: `linear-gradient(135deg, ${accent} 0%, ${accent}99 50%, ${accent}44 100%)` }
         }
       >
         {profile.cover_url && (
@@ -24,20 +30,19 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
             src={profile.cover_url}
             alt="Bannière"
             fill
-            className="object-cover"
+            className="object-cover rounded-2xl"
             priority
             sizes="100vw"
           />
         )}
-        {/* Gradient overlay bottom */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+        <div className="absolute inset-3 rounded-2xl bg-gradient-to-t from-black/25 to-transparent" />
       </div>
 
-      {/* Avatar */}
+      {/* Avatar overlapping cover */}
       <div className="absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-1/2">
         <div
-          className="w-28 h-28 rounded-full overflow-hidden border-[3px] border-white shadow-xl bg-gray-100"
-          style={{ boxShadow: `0 0 0 3px white, 0 8px 32px ${accent}40` }}
+          className="w-28 h-28 rounded-full overflow-hidden bg-gray-100"
+          style={{ border: '4px solid white', boxShadow: `0 4px 24px rgba(0,0,0,0.15), 0 0 0 2px ${accent}40` }}
         >
           {profile.avatar_url ? (
             <Image
@@ -51,7 +56,7 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
           ) : (
             <div
               className="w-full h-full flex items-center justify-center text-3xl font-bold text-white"
-              style={{ background: `linear-gradient(135deg, ${accent}, ${accent}CC)` }}
+              style={{ background: `linear-gradient(135deg, ${accent}, ${accent}BB)` }}
             >
               {(profile.full_name || profile.username)[0]?.toUpperCase()}
             </div>

@@ -46,7 +46,8 @@ function PlatformIcon({ slug, color, size = 22 }: { slug: string; color: string;
 }
 
 export function PublicProfile({ profile, showBranding }: PublicProfileProps) {
-  const accent = profile.accent_color || '#0099FF'
+  const raw = profile.accent_color
+  const accent = (!raw || raw === '#6366F1') ? '#0099FF' : raw
   const phones = profile.phone_numbers.filter((p) => p.number)
   const links = [...profile.social_links].sort((a, b) => a.order - b.order)
 
