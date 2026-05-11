@@ -1,6 +1,6 @@
 {
   "framework": "nextjs",
-  "buildCommand": "npm run build",
+  "buildCommand": "next build --no-turbo",
   "installCommand": "npm install",
   "regions": ["cdg1"]
 }
