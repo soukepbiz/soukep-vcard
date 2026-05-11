@@ -38,20 +38,29 @@ export default async function PublicProfilePage({ params }: Props) {
   const { username } = await params
   const supabase = await createClient()
 
+  // Check if the viewer is the owner of this profile
+  const { data: { user } } = await supabase.auth.getUser()
+
   const { data: profile, error } = await supabase
     .from('profiles')
     .select('*')
     .eq('username', username)
-    .eq('is_published', true)
     .single()
 
   if (error || !profile) notFound()
 
-  // Record view (fire and forget)
-  supabase
-    .from('profile_views')
-    .insert({ profile_id: profile.id })
-    .then(() => {})
+  const isOwner = user?.id === profile.id
+
+  // Non-published profiles are only visible to their owner
+  if (!profile.is_published && !isOwner) notFound()
+
+  // Record view only for published profiles visited by non-owners
+  if (profile.is_published && !isOwner) {
+    supabase
+      .from('profile_views')
+      .insert({ profile_id: profile.id })
+      .then(() => {})
+  }
 
   const typedProfile: Profile = {
     ...profile,
@@ -62,5 +71,14 @@ export default async function PublicProfilePage({ params }: Props) {
 
   const showBranding = profile.subscription_type === 'free'
 
-  return <PublicProfile profile={typedProfile} showBranding={showBranding} />
+  return (
+    <>
+      {!profile.is_published && isOwner && (
+        <div className="fixed top-0 left-0 right-0 z-50 bg-amber-500 text-white text-center text-xs font-semibold py-2 px-4">
+          Aperçu — Cette carte n&apos;est pas encore publiée. Activez la publication depuis votre dashboard.
+        </div>
+      )}
+      <PublicProfile profile={typedProfile} showBranding={showBranding} />
+    </>
+  )
 }
