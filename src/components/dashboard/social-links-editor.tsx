@@ -5,7 +5,7 @@ import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-p
 import type { SocialLink } from '@/types/profile'
 import { nanoid } from 'nanoid'
 import { BRAND_PATHS } from '@/lib/brand-icons'
-import { Globe, Link as LinkIcon } from 'lucide-react'
+import { Globe, Link as LinkIcon, Pencil, Check, X } from 'lucide-react'
 
 const PLATFORMS = [
   { id: 'whatsapp',   label: 'WhatsApp',   color: '#25D366', placeholder: 'https://wa.me/33600000000' },
@@ -51,6 +51,25 @@ export function SocialLinksEditor({ links, onChange, maxLinks }: SocialLinksEdit
   const [addingPlatform, setAddingPlatform] = useState<string | null>(null)
   const [newUrl, setNewUrl] = useState('')
   const [newTitle, setNewTitle] = useState('')
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editTitle, setEditTitle] = useState('')
+  const [editUrl, setEditUrl] = useState('')
+
+  function startEdit(link: SocialLink) {
+    setEditingId(link.id)
+    setEditTitle(link.title)
+    setEditUrl(link.url)
+  }
+
+  function confirmEdit() {
+    if (!editingId || !editUrl) return
+    onChange(links.map((l) => l.id === editingId ? { ...l, title: editTitle, url: editUrl } : l))
+    setEditingId(null)
+  }
+
+  function cancelEdit() {
+    setEditingId(null)
+  }
 
   function handleDragEnd(result: DropResult) {
     if (!result.destination) return
@@ -161,21 +180,61 @@ export function SocialLinksEditor({ links, onChange, maxLinks }: SocialLinksEdit
                         <div
                           ref={provided.innerRef}
                           {...provided.draggableProps}
-                          className={`flex items-center gap-3 bg-white border rounded-xl px-3 py-2.5 transition-shadow ${
-                            snapshot.isDragging ? 'shadow-lg border-[#B3DBFF]' : 'border-gray-200'
+                          className={`flex flex-col gap-2 bg-white border rounded-xl px-3 py-2.5 transition-shadow ${
+                            snapshot.isDragging ? 'shadow-lg border-[#B3DBFF]' : editingId === link.id ? 'border-[#0099FF]' : 'border-gray-200'
                           }`}
                         >
-                          <div {...provided.dragHandleProps} className="text-gray-300 cursor-grab">
-                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 6a2 2 0 100-4 2 2 0 000 4zm0 8a2 2 0 100-4 2 2 0 000 4zm0 8a2 2 0 100-4 2 2 0 000 4zm8-16a2 2 0 100-4 2 2 0 000 4zm0 8a2 2 0 100-4 2 2 0 000 4zm0 8a2 2 0 100-4 2 2 0 000 4z"/></svg>
-                          </div>
-                          <PlatformIcon id={link.platform} color={p?.color || '#6B7280'} />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-gray-800 truncate">{link.title}</p>
-                            <p className="text-xs text-gray-400 truncate">{link.url}</p>
-                          </div>
-                          <button type="button" onClick={() => removeLink(link.id)} className="p-1 text-gray-300 hover:text-red-500 transition-colors">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/></svg>
-                          </button>
+                          {editingId === link.id ? (
+                            /* Mode édition inline */
+                            <>
+                              <div className="flex items-center gap-2">
+                                <PlatformIcon id={link.platform} color={p?.color || '#6B7280'} />
+                                <span className="text-xs font-semibold text-[#0099FF]">{p?.label || link.platform}</span>
+                              </div>
+                              <input
+                                type="text"
+                                value={editTitle}
+                                onChange={(e) => setEditTitle(e.target.value)}
+                                placeholder="Titre affiché"
+                                className="h-9 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#0099FF]"
+                              />
+                              <input
+                                type="url"
+                                value={editUrl}
+                                onChange={(e) => setEditUrl(e.target.value)}
+                                placeholder={p?.placeholder || 'https://...'}
+                                className="h-9 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#0099FF]"
+                              />
+                              <div className="flex gap-2">
+                                <button type="button" onClick={confirmEdit} disabled={!editUrl}
+                                  className="flex-1 h-8 bg-[#0099FF] disabled:opacity-50 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1 hover:bg-[#0077CC] transition-colors">
+                                  <Check size={13} /> Valider
+                                </button>
+                                <button type="button" onClick={cancelEdit}
+                                  className="flex-1 h-8 bg-white border border-gray-200 text-gray-600 text-xs font-medium rounded-lg flex items-center justify-center gap-1 hover:bg-gray-50 transition-colors">
+                                  <X size={13} /> Annuler
+                                </button>
+                              </div>
+                            </>
+                          ) : (
+                            /* Mode affichage */
+                            <div className="flex items-center gap-3">
+                              <div {...provided.dragHandleProps} className="text-gray-300 cursor-grab">
+                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 6a2 2 0 100-4 2 2 0 000 4zm0 8a2 2 0 100-4 2 2 0 000 4zm0 8a2 2 0 100-4 2 2 0 000 4zm8-16a2 2 0 100-4 2 2 0 000 4zm0 8a2 2 0 100-4 2 2 0 000 4zm0 8a2 2 0 100-4 2 2 0 000 4z"/></svg>
+                              </div>
+                              <PlatformIcon id={link.platform} color={p?.color || '#6B7280'} />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-semibold text-gray-800 truncate">{link.title}</p>
+                                <p className="text-xs text-gray-400 truncate">{link.url}</p>
+                              </div>
+                              <button type="button" onClick={() => startEdit(link)} className="p-1 text-gray-300 hover:text-[#0099FF] transition-colors">
+                                <Pencil size={14} />
+                              </button>
+                              <button type="button" onClick={() => removeLink(link.id)} className="p-1 text-gray-300 hover:text-red-500 transition-colors">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/></svg>
+                              </button>
+                            </div>
+                          )}
                         </div>
                       )}
                     </Draggable>
