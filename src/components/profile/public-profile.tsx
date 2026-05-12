@@ -97,18 +97,18 @@ export function PublicProfile({ profile, showBranding }: PublicProfileProps) {
 
   if (phones[0]) quickActions.push({
     key: 'phone', href: `tel:${phones[0].number}`, bg: accent,
-    icon: <Phone size={18} color={textColor} strokeWidth={2.5} />, label: 'Appeler',
+    icon: <Phone size={22} color={textColor} strokeWidth={2.5} />, label: 'Appeler',
   })
   if (emails[0]) quickActions.push({
     key: 'email', href: `mailto:${emails[0].email}`, bg: accent,
-    icon: <Mail size={18} color={textColor} strokeWidth={2.5} />, label: 'Email',
+    icon: <Mail size={22} color={textColor} strokeWidth={2.5} />, label: 'Email',
   })
   links.slice(0, 3).forEach((link) => {
     const slug = link.platform.toLowerCase()
     const bg = PLATFORM_COLORS[slug] || accent
     quickActions.push({
       key: link.id, href: normalizeUrl(link.url), bg,
-      icon: <BrandIcon platform={slug} color={textColor} size={18} />, label: link.title,
+      icon: <BrandIcon platform={slug} color={textColor} size={22} />, label: link.title,
     })
   })
 
@@ -160,11 +160,11 @@ export function PublicProfile({ profile, showBranding }: PublicProfileProps) {
 
           {/* Quick action circles */}
           {quickActions.length > 0 && (
-            <motion.div variants={item} className="flex items-start justify-center gap-2.5 px-4 pb-3 flex-nowrap overflow-x-auto">
+            <motion.div variants={item} className="flex items-start justify-center gap-3 px-5 pb-3 flex-nowrap overflow-x-auto">
               {quickActions.map((a) => (
                 <a key={a.key} href={a.href} target="_blank" rel="noopener noreferrer"
-                  className="flex flex-col items-center gap-1 flex-shrink-0">
-                  <div className="w-12 h-12 rounded-full flex items-center justify-center shadow-md active:scale-95 transition-transform"
+                  className="flex flex-col items-center gap-1.5 flex-shrink-0">
+                  <div className="w-14 h-14 rounded-full flex items-center justify-center shadow-md active:scale-95 transition-transform"
                     style={{ backgroundColor: a.bg }}>
                     {a.icon}
                   </div>
