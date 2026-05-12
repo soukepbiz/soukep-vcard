@@ -48,9 +48,10 @@ export function CoverUpload({ userId, currentUrl, onUpload }: CoverUploadProps) 
   return (
     <>
       <div className="relative w-full">
-        {/* Cover preview / upload zone */}
+        {/* Cover preview / upload zone — ratio 10:5.3 matches public card (448px / 200px) */}
         <div
-          className="relative w-full h-32 rounded-2xl overflow-hidden bg-gradient-to-r from-[#E6F4FF] to-[#B3DBFF] border-2 border-dashed border-gray-200 hover:border-[#33ADFF] transition-colors cursor-pointer group"
+          className="relative w-full rounded-2xl overflow-hidden bg-gradient-to-r from-[#E6F4FF] to-[#B3DBFF] border-2 border-dashed border-gray-200 hover:border-[#33ADFF] transition-colors cursor-pointer group"
+          style={{ aspectRatio: '448 / 200' }}
           onClick={() => inputRef.current?.click()}
         >
           {currentUrl ? (

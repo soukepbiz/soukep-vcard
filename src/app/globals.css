@@ -80,6 +80,13 @@
   html {
     scroll-behavior: smooth;
   }
+
+  /* iOS scaling: augmente polices et espacements sur petits écrans */
+  @media (max-width: 375px) {
+    html {
+      font-size: 16px;
+    }
+  }
 }
 
 * { box-sizing: border-box; }
