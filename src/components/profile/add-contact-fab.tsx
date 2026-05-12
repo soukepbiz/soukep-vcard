@@ -8,13 +8,13 @@ interface AddContactFabProps {
 
 export function AddContactFab({ username, accentColor, contrastColor = '#FFFFFF' }: AddContactFabProps) {
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-sm px-4">
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-full max-w-xs px-4 pointer-events-none">
       <a
         href={`/${username}/vcard`}
         download
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-center justify-center gap-2.5 w-full h-14 rounded-2xl font-bold text-base tracking-wide active:scale-[0.98] transition-all duration-200"
+        className="flex items-center justify-center gap-2.5 w-full h-12 rounded-xl font-semibold text-sm tracking-wide active:scale-[0.98] transition-all duration-200 pointer-events-auto"
         style={{
           backgroundColor: accentColor,
           color: contrastColor,
