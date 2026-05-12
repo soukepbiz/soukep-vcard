@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { ProfileHeader } from './profile-header'
 import { AddContactFab } from './add-contact-fab'
@@ -71,6 +71,16 @@ export function PublicProfile({ profile, showBranding }: PublicProfileProps) {
   const accent = resolveAccent(profile.accent_color)
   const textColor = profile.text_color || '#FFFFFF'
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+
+  useEffect(() => {
+    const prev = document.body.style.backgroundColor
+    document.body.style.backgroundColor = '#FFFFFF'
+    document.documentElement.style.backgroundColor = '#FFFFFF'
+    return () => {
+      document.body.style.backgroundColor = prev
+      document.documentElement.style.backgroundColor = ''
+    }
+  }, [])
 
   const phones = profile.phone_numbers.filter((p) => p.number)
   const emails = Array.isArray(profile.emails) ? profile.emails.filter((e) => e.email) : []
