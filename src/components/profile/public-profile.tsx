@@ -177,12 +177,9 @@ export function PublicProfile({ profile, showBranding }: PublicProfileProps) {
           )}
 
           {showBranding && (
-            <>
-              <div className="h-2.5 bg-[#F4F6F9]" />
-              <motion.div variants={item} className="px-5 py-4">
-                <BrandingFooter />
-              </motion.div>
-            </>
+            <motion.div variants={item} className="pb-3">
+              <BrandingFooter />
+            </motion.div>
           )}
         </motion.div>
       </div>
