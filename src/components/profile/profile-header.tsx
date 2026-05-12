@@ -19,7 +19,7 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
     <div className="relative">
       {/* Cover — top full-width, only bottom corners rounded */}
       <div
-        className={`h-44 w-full overflow-hidden relative ${coverRadius}`}
+        className={`h-52 w-full overflow-hidden relative ${coverRadius}`}
         style={
           profile.cover_url
             ? {
