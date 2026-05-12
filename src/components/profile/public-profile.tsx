@@ -206,7 +206,7 @@ export function PublicProfile({ profile, showBranding }: PublicProfileProps) {
 
               {/* Vue grille */}
               {viewMode === 'grid' && (
-                <div className="grid grid-cols-3 sm:grid-cols-4 gap-x-3 gap-y-5">
+                <div className="grid grid-cols-5 gap-x-2 gap-y-4">
                   {phones.map((phone, i) => (
                     <a key={phone.id ?? `phone-${i}`} href={`tel:${phone.number}`} target="_blank" rel="noopener noreferrer"
                       className="flex flex-col items-center gap-1.5 active:scale-95 transition-transform">

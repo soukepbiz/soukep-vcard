@@ -94,6 +94,7 @@ export async function generateVCard(profile: Profile): Promise<string> {
     }
   }
 
+  lines.push('PRODID:-//Soukep vCard//EN')
   lines.push('END:VCARD')
 
   return lines.join('\r\n')

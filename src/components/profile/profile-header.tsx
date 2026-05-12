@@ -18,7 +18,7 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
     <div className="relative">
       {/* Cover — top full-width, only bottom corners rounded */}
       <div
-        className="h-44 w-full overflow-hidden rounded-b-3xl relative bg-gray-200"
+        className="h-44 w-full overflow-hidden rounded-b-3xl relative"
         style={
           profile.cover_url
             ? undefined
@@ -30,7 +30,7 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
             src={profile.cover_url}
             alt="Bannière"
             fill
-            className="object-contain w-full h-full"
+            className="object-cover object-center"
             priority
             sizes="(max-width: 768px) 100vw, 448px"
           />
