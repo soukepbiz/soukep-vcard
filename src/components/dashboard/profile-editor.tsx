@@ -112,7 +112,7 @@ export function ProfileEditor({ profile: initialProfile }: ProfileEditorProps) {
   ]
 
   const SaveButton = ({ full }: { full?: boolean }) => (
-    <Button onClick={handleSave} loading={saving} size="sm" className={full ? 'w-full h-11 text-base' : ''}>
+    <Button onClick={handleSave} loading={saving} size="sm" className={full ? 'w-full h-9 text-sm' : ''}>
       {saved ? '✓ Sauvegardé' : 'Sauvegarder'}
     </Button>
   )
