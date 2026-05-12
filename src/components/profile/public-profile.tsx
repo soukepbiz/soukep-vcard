@@ -99,7 +99,7 @@ export function PublicProfile({ profile, showBranding }: PublicProfileProps) {
   const hasContacts = phones.length > 0 || emails.length > 0 || links.length > 0
 
   return (
-    <div className="min-h-screen pb-6 relative overflow-hidden" style={{ backgroundColor: '#F4F6F9' }}>
+    <div className="min-h-screen pb-6 relative overflow-hidden bg-white">
       <BgPattern accent={accent} />
       <div className="relative max-w-md mx-auto bg-white shadow-sm min-h-screen">
         <ProfileHeader profile={profile} />
