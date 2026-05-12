@@ -160,10 +160,10 @@ export function PublicProfile({ profile, showBranding }: PublicProfileProps) {
 
           {/* Quick action circles */}
           {quickActions.length > 0 && (
-            <motion.div variants={item} className="flex items-start justify-center gap-3 px-5 pb-3 flex-nowrap overflow-x-auto">
+            <motion.div variants={item} className="flex items-start justify-center gap-2.5 px-4 pb-3 flex-nowrap overflow-x-auto">
               {quickActions.map((a) => (
                 <a key={a.key} href={a.href} target="_blank" rel="noopener noreferrer"
-                  className="flex flex-col items-center gap-1.5 flex-shrink-0">
+                  className="flex flex-col items-center gap-1 flex-shrink-0">
                   <div className="w-14 h-14 rounded-full flex items-center justify-center shadow-md active:scale-95 transition-transform"
                     style={{ backgroundColor: a.bg }}>
                     {a.icon}
