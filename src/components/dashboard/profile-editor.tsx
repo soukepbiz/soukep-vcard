@@ -111,46 +111,55 @@ export function ProfileEditor({ profile: initialProfile }: ProfileEditorProps) {
     { id: 'theme', label: 'Thème' },
   ]
 
+  const SaveButton = ({ full }: { full?: boolean }) => (
+    <Button onClick={handleSave} loading={saving} size="sm" className={full ? 'w-full h-11 text-base' : ''}>
+      {saved ? '✓ Sauvegardé' : 'Sauvegarder'}
+    </Button>
+  )
+
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-5 pb-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold text-gray-900">Ma carte de visite</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
-            {profile.is_published ? (
-              <span className="text-green-600 font-medium">● Publiée</span>
-            ) : (
-              <span className="text-gray-400">● Brouillon</span>
-            )}
-          </p>
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-bold text-gray-900">Ma carte de visite</h1>
+            <p className="text-sm mt-0.5">
+              {profile.is_published ? (
+                <span className="text-green-600 font-medium">● Publiée</span>
+              ) : (
+                <span className="text-gray-400">● Brouillon</span>
+              )}
+            </p>
+          </div>
+          <SaveButton />
         </div>
-        <div className="flex items-center gap-2">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <span className="text-sm text-gray-600">Publier</span>
-            <div
-              onClick={async () => {
-                const newVal = !profile.is_published
-                update('is_published', newVal)
-                await fetch('/api/profile', {
-                  method: 'PATCH',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ is_published: newVal }),
-                })
-                startTransition(() => router.refresh())
-              }}
-              className={`relative w-11 h-6 rounded-full transition-colors ${
-                profile.is_published ? 'bg-[#0099FF]' : 'bg-gray-200'
-              }`}
-            >
-              <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all ${
-                profile.is_published ? 'left-6' : 'left-1'
-              }`} />
-            </div>
-          </label>
-          <Button onClick={handleSave} loading={saving} size="sm">
-            {saved ? '✓ Sauvegardé' : 'Sauvegarder'}
-          </Button>
+
+        {/* Publish toggle — full width row */}
+        <div className="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-3">
+          <div>
+            <p className="text-sm font-semibold text-gray-700">Publier la carte</p>
+            <p className="text-xs text-gray-400 mt-0.5">Rendre votre profil visible publiquement</p>
+          </div>
+          <div
+            onClick={async () => {
+              const newVal = !profile.is_published
+              update('is_published', newVal)
+              await fetch('/api/profile', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ is_published: newVal }),
+              })
+              startTransition(() => router.refresh())
+            }}
+            className={`relative w-12 h-6 rounded-full cursor-pointer transition-colors flex-shrink-0 ${
+              profile.is_published ? 'bg-[#0099FF]' : 'bg-gray-200'
+            }`}
+          >
+            <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all ${
+              profile.is_published ? 'left-7' : 'left-1'
+            }`} />
+          </div>
         </div>
       </div>
 
@@ -194,8 +203,31 @@ export function ProfileEditor({ profile: initialProfile }: ProfileEditorProps) {
                 className={inputCls}
               />
             </FieldRow>
-            <FieldRow icon={<IconBadge />} label="Nom complet">
-              <input type="text" value={profile.full_name || ''} onChange={(e) => update('full_name', e.target.value)} placeholder="Jean Dupont" className={inputCls} />
+            <FieldRow icon={<IconBadge />} label="Prénom(s)">
+              <input
+                type="text"
+                value={profile.first_name || ''}
+                onChange={(e) => {
+                  const fn = e.target.value
+                  update('first_name', fn)
+                  update('full_name', [fn, profile.last_name].filter(Boolean).join(' '))
+                }}
+                placeholder="Jean"
+                className={inputCls}
+              />
+            </FieldRow>
+            <FieldRow icon={<IconBadge />} label="Nom(s)">
+              <input
+                type="text"
+                value={profile.last_name || ''}
+                onChange={(e) => {
+                  const ln = e.target.value
+                  update('last_name', ln)
+                  update('full_name', [profile.first_name, ln].filter(Boolean).join(' '))
+                }}
+                placeholder="Dupont"
+                className={inputCls}
+              />
             </FieldRow>
             <FieldRow icon={<IconBriefcase />} label="Poste / Titre">
               <input type="text" value={profile.job_title || ''} onChange={(e) => update('job_title', e.target.value)} placeholder="Directeur Commercial" className={inputCls} />
@@ -206,14 +238,23 @@ export function ProfileEditor({ profile: initialProfile }: ProfileEditorProps) {
             <FieldRow icon={<IconPin />} label="Localisation">
               <input type="text" value={profile.location || ''} onChange={(e) => update('location', e.target.value)} placeholder="Paris, France" className={inputCls} />
             </FieldRow>
-            <div>
-              <p className="text-xs font-semibold text-gray-500 mb-1.5">Bio courte</p>
+            <FieldRow icon={<IconBadge />} label="Intitulé de la section bio">
+              <input
+                type="text"
+                value={profile.bio_title || ''}
+                onChange={(e) => update('bio_title', e.target.value)}
+                placeholder="À propos"
+                className={inputCls}
+              />
+            </FieldRow>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Bio courte</label>
               <textarea
                 rows={3}
                 value={profile.bio || ''}
                 onChange={(e) => update('bio', e.target.value)}
                 placeholder="Quelques mots sur vous..."
-                className={`${inputCls} resize-none py-2.5`}
+                className={`${inputCls} h-auto resize-none py-2.5`}
               />
             </div>
           </div>
@@ -225,20 +266,20 @@ export function ProfileEditor({ profile: initialProfile }: ProfileEditorProps) {
             {/* Téléphones */}
             {profile.phone_numbers.map((phone, i) => (
               <FieldRow key={phone.id} icon={<IconPhone />} label={`Téléphone ${i + 1}`} onRemove={() => update('phone_numbers', profile.phone_numbers.filter((_, j) => j !== i))}>
-                <div className="flex gap-2">
+                <div className="flex flex-col gap-2">
                   <input
                     type="text"
                     value={phone.label}
                     onChange={(e) => { const u = [...profile.phone_numbers]; u[i] = { ...phone, label: e.target.value }; update('phone_numbers', u) }}
-                    placeholder="Label"
-                    className={`${inputCls} w-28`}
+                    placeholder="Label (ex: Professionnel)"
+                    className={inputCls}
                   />
                   <input
                     type="tel"
                     value={phone.number}
                     onChange={(e) => { const u = [...profile.phone_numbers]; u[i] = { ...phone, number: e.target.value }; update('phone_numbers', u) }}
                     placeholder="+33 6 00 00 00 00"
-                    className={`${inputCls} flex-1`}
+                    className={inputCls}
                   />
                 </div>
               </FieldRow>
@@ -250,20 +291,20 @@ export function ProfileEditor({ profile: initialProfile }: ProfileEditorProps) {
             {/* Emails */}
             {(profile.emails || []).map((em, i) => (
               <FieldRow key={em.id} icon={<IconMail />} label={`Email ${i + 1}`} onRemove={() => update('emails', (profile.emails || []).filter((_, j) => j !== i))}>
-                <div className="flex gap-2">
+                <div className="flex flex-col gap-2">
                   <input
                     type="text"
                     value={em.label}
                     onChange={(e) => { const u = [...(profile.emails || [])]; u[i] = { ...em, label: e.target.value }; update('emails', u) }}
-                    placeholder="Label"
-                    className={`${inputCls} w-28`}
+                    placeholder="Label (ex: Professionnel)"
+                    className={inputCls}
                   />
                   <input
                     type="email"
                     value={em.email}
                     onChange={(e) => { const u = [...(profile.emails || [])]; u[i] = { ...em, email: e.target.value }; update('emails', u) }}
                     placeholder="contact@exemple.com"
-                    className={`${inputCls} flex-1`}
+                    className={inputCls}
                   />
                 </div>
               </FieldRow>
@@ -272,6 +313,8 @@ export function ProfileEditor({ profile: initialProfile }: ProfileEditorProps) {
               + Ajouter un email
             </AddBtn>
           </div>
+
+          <SaveButton full />
         </div>
       )}
 
@@ -292,16 +335,22 @@ export function ProfileEditor({ profile: initialProfile }: ProfileEditorProps) {
             onChange={(links) => update('social_links', links)}
             maxLinks={limits.maxLinks}
           />
+          <SaveButton full />
         </div>
       )}
 
       {tab === 'theme' && (
-        <ThemeEditor
-          accentColor={profile.accent_color || '#0099FF'}
-          onChange={(color) => update('accent_color', color)}
-          isPremium={premium}
-          extractedColor={extractedColor}
-        />
+        <div className="flex flex-col gap-4">
+          <ThemeEditor
+            accentColor={profile.accent_color || '#0099FF'}
+            textColor={profile.text_color || '#FFFFFF'}
+            onChangeAccent={(color) => update('accent_color', color)}
+            onChangeText={(color) => update('text_color', color)}
+            isPremium={premium}
+            extractedColor={extractedColor}
+          />
+          <SaveButton full />
+        </div>
       )}
     </div>
   )

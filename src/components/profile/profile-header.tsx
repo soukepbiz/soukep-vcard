@@ -30,12 +30,12 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
             src={profile.cover_url}
             alt="Bannière"
             fill
-            className="object-cover"
+            className="object-cover rounded-b-3xl"
             priority
             sizes="100vw"
           />
         )}
-        <div className="absolute inset-0 rounded-b-3xl bg-gradient-to-t from-black/20 to-transparent" />
+        <div className="absolute inset-0 rounded-b-3xl bg-gradient-to-t from-black/15 to-transparent" />
       </div>
 
       {/* Avatar overlapping cover */}
@@ -58,7 +58,7 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
               className="w-full h-full flex items-center justify-center text-3xl font-bold text-white"
               style={{ background: `linear-gradient(135deg, ${accent}, ${accent}BB)` }}
             >
-              {(profile.full_name || profile.username)[0]?.toUpperCase()}
+              {(profile.first_name || profile.full_name || profile.username)[0]?.toUpperCase()}
             </div>
           )}
         </div>

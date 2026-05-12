@@ -7,12 +7,13 @@ function escapeVCard(str: string): string {
 export async function generateVCard(profile: Profile): Promise<string> {
   const lines: string[] = ['BEGIN:VCARD', 'VERSION:3.0']
 
-  if (profile.full_name) {
-    lines.push(`FN:${escapeVCard(profile.full_name)}`)
-    const parts = profile.full_name.split(' ')
-    const last = parts.pop() || ''
-    const first = parts.join(' ')
-    lines.push(`N:${escapeVCard(last)};${escapeVCard(first)};;;`)
+  const firstName = profile.first_name || (profile.full_name ? profile.full_name.split(' ').slice(0, -1).join(' ') : '')
+  const lastName = profile.last_name || (profile.full_name ? profile.full_name.split(' ').pop() || '' : '')
+  const displayName = [firstName, lastName].filter(Boolean).join(' ') || profile.full_name
+
+  if (displayName) {
+    lines.push(`FN:${escapeVCard(displayName)}`)
+    lines.push(`N:${escapeVCard(lastName)};${escapeVCard(firstName)};;;`)
   }
 
   if (profile.job_title) lines.push(`TITLE:${escapeVCard(profile.job_title)}`)

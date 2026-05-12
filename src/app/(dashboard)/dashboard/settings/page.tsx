@@ -1,19 +1,75 @@
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
+'use client'
+
+import { useState, useEffect } from 'react'
 import { isPremium } from '@/lib/utils'
+import { SubscriptionUpgradeModal } from '@/components/subscription/upgrade-modal'
 
-export default async function SettingsPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/')
+interface Profile {
+  subscription_type: string | null
+  subscription_expires_at: string | null
+}
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('subscription_type, subscription_expires_at, username')
-    .eq('id', user.id)
-    .single()
+interface User {
+  email?: string
+}
 
-  const premium = profile ? isPremium(profile.subscription_type, profile.subscription_expires_at) : false
+export default function SettingsPage() {
+  const [user, setUser] = useState<User | null>(null)
+  const [profile, setProfile] = useState<Profile | null>(null)
+  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState(false)
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const res = await fetch('/api/profile')
+        if (!res.ok) {
+          setError(true)
+          return
+        }
+        const data = await res.json()
+        setProfile(data.profile)
+        setUser({ email: data.email })
+      } catch (err) {
+        console.error('Error loading settings:', err)
+        setError(true)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    loadData()
+  }, [])
+
+  const handleUpgrade = async (subscriptionType: string, duration: string) => {
+    try {
+      const res = await fetch('/api/user/subscription', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subscriptionType, duration }),
+      })
+      if (!res.ok) throw new Error('Failed to upgrade')
+
+      const updated = await res.json()
+      setProfile({
+        subscription_type: subscriptionType,
+        subscription_expires_at: updated.subscription_expires_at || null,
+      })
+    } catch (error) {
+      console.error('Upgrade failed:', error)
+      alert('Erreur lors de la mise à jour de l\'abonnement')
+    }
+  }
+
+  if (isLoading) {
+    return <div className="flex items-center justify-center py-20">Chargement...</div>
+  }
+
+  if (error || !profile) {
+    return <div className="flex items-center justify-center py-20 text-red-600">Erreur au chargement des paramètres</div>
+  }
+
+  const premium = isPremium(profile.subscription_type || 'free', profile.subscription_expires_at)
 
   return (
     <div className="flex flex-col gap-6 max-w-lg">
@@ -24,7 +80,7 @@ export default async function SettingsPage() {
         <h2 className="text-sm font-semibold text-gray-900">Informations du compte</h2>
         <div>
           <p className="text-xs text-gray-500 mb-1">Email</p>
-          <p className="text-sm text-gray-800">{user.email}</p>
+          <p className="text-sm text-gray-800">{user?.email}</p>
         </div>
         <div>
           <p className="text-xs text-gray-500 mb-1">Abonnement</p>
@@ -58,12 +114,12 @@ export default async function SettingsPage() {
               </li>
             ))}
           </ul>
-          <a
-            href="/api/stripe/checkout"
+          <button
+            onClick={() => setIsUpgradeModalOpen(true)}
             className="inline-flex items-center justify-center h-11 px-6 bg-white text-[#0077CC] font-semibold rounded-xl text-sm hover:bg-[#E6F4FF] transition-colors"
           >
             Upgrader maintenant
-          </a>
+          </button>
         </div>
       )}
 
@@ -75,6 +131,13 @@ export default async function SettingsPage() {
           Supprimer mon compte
         </button>
       </div>
+
+      {/* Upgrade Modal */}
+      <SubscriptionUpgradeModal
+        isOpen={isUpgradeModalOpen}
+        onClose={() => setIsUpgradeModalOpen(false)}
+        onUpgrade={handleUpgrade}
+      />
     </div>
   )
 }

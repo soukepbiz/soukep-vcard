@@ -1,11 +1,12 @@
 'use client'
 
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { ProfileHeader } from './profile-header'
 import { AddContactFab } from './add-contact-fab'
 import { BrandingFooter } from './branding-footer'
 import type { Profile } from '@/types/profile'
-import { MapPin, Briefcase, Building2, Phone, Mail, Globe } from 'lucide-react'
+import { MapPin, Briefcase, Building2, Phone, Mail, Globe, LayoutGrid, List, Copy, Check } from 'lucide-react'
 import { BRAND_PATHS, resolveAccent } from '@/lib/brand-icons'
 
 interface PublicProfileProps {
@@ -29,13 +30,32 @@ function BrandIcon({ platform, color, size = 24 }: { platform: string; color: st
   return <Globe width={size} height={size} color={color} strokeWidth={1.8} />
 }
 
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false)
+  function handleCopy(e: React.MouseEvent) {
+    e.preventDefault()
+    e.stopPropagation()
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1800)
+    })
+  }
+  return (
+    <button
+      onClick={handleCopy}
+      className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors flex-shrink-0"
+    >
+      {copied ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
+    </button>
+  )
+}
+
 const container = {
   hidden: { opacity: 0 },
   show: { opacity: 1, transition: { staggerChildren: 0.06, delayChildren: 0.05 } },
 }
 const item = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }
 
-// Subtle dot pattern SVG for background
 const BgPattern = ({ accent }: { accent: string }) => (
   <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-[0.04]" xmlns="http://www.w3.org/2000/svg">
     <defs>
@@ -49,6 +69,9 @@ const BgPattern = ({ accent }: { accent: string }) => (
 
 export function PublicProfile({ profile, showBranding }: PublicProfileProps) {
   const accent = resolveAccent(profile.accent_color)
+  const textColor = profile.text_color || '#FFFFFF'
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+
   const phones = profile.phone_numbers.filter((p) => p.number)
   const emails = Array.isArray(profile.emails) ? profile.emails.filter((e) => e.email) : []
   const links = [...profile.social_links].sort((a, b) => a.order - b.order)
@@ -58,41 +81,45 @@ export function PublicProfile({ profile, showBranding }: PublicProfileProps) {
 
   if (phones[0]) quickActions.push({
     key: 'phone', href: `tel:${phones[0].number}`, bg: accent,
-    icon: <Phone size={22} color="#FFFFFF" strokeWidth={2.5} />, label: 'Appeler',
+    icon: <Phone size={22} color={textColor} strokeWidth={2.5} />, label: 'Appeler',
   })
   if (emails[0]) quickActions.push({
     key: 'email', href: `mailto:${emails[0].email}`, bg: accent,
-    icon: <Mail size={22} color="#FFFFFF" strokeWidth={2.5} />, label: 'Email',
+    icon: <Mail size={22} color={textColor} strokeWidth={2.5} />, label: 'Email',
   })
   links.slice(0, 3).forEach((link) => {
     const slug = link.platform.toLowerCase()
     const bg = PLATFORM_COLORS[slug] || accent
     quickActions.push({
       key: link.id, href: link.url, bg,
-      icon: <BrandIcon platform={slug} color="#FFFFFF" size={22} />, label: link.title,
+      icon: <BrandIcon platform={slug} color={textColor} size={22} />, label: link.title,
     })
   })
 
-  const hasGrid = phones.length > 0 || emails.length > 0 || links.length > 0
+  const hasContacts = phones.length > 0 || emails.length > 0 || links.length > 0
 
   return (
-    <div className="min-h-screen pb-32 relative overflow-hidden" style={{ backgroundColor: '#F4F6F9' }}>
+    <div className="min-h-screen pb-6 relative overflow-hidden" style={{ backgroundColor: '#F4F6F9' }}>
       <BgPattern accent={accent} />
       <div className="relative max-w-md mx-auto bg-white shadow-sm min-h-screen">
         <ProfileHeader profile={profile} />
 
-        <motion.div variants={container} initial="hidden" animate="show" className="flex flex-col pt-16">
+        <motion.div variants={container} initial="hidden" animate="show" className="flex flex-col pt-14">
 
           {/* Identity */}
-          <motion.div variants={item} className="text-center px-6 pb-5 pt-2">
-            {profile.full_name && (
-              <h1 className="text-[26px] font-extrabold text-gray-900 leading-tight">{profile.full_name}</h1>
+          <motion.div variants={item} className="text-center px-6 pb-3 pt-1">
+            {(profile.first_name || profile.last_name || profile.full_name) && (
+              <h1 className="text-[26px] font-extrabold text-gray-900 leading-tight">
+                {profile.first_name || profile.last_name
+                  ? [profile.first_name, profile.last_name].filter(Boolean).join(' ')
+                  : profile.full_name}
+              </h1>
             )}
             {profile.job_title && (
               <div className="flex items-center justify-center gap-1.5 mt-2">
                 <span
-                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold text-white"
-                  style={{ backgroundColor: accent }}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold"
+                  style={{ backgroundColor: accent, color: textColor }}
                 >
                   <Briefcase className="w-3 h-3 flex-shrink-0" />
                   {profile.job_title}
@@ -109,7 +136,7 @@ export function PublicProfile({ profile, showBranding }: PublicProfileProps) {
 
           {/* Quick action circles */}
           {quickActions.length > 0 && (
-            <motion.div variants={item} className="flex items-start justify-center gap-5 px-6 pb-6 flex-wrap">
+            <motion.div variants={item} className="flex items-start justify-center gap-5 px-6 pb-3 flex-wrap">
               {quickActions.map((a) => (
                 <a key={a.key} href={a.href} target="_blank" rel="noopener noreferrer"
                   className="flex flex-col items-center gap-1.5">
@@ -117,23 +144,21 @@ export function PublicProfile({ profile, showBranding }: PublicProfileProps) {
                     style={{ backgroundColor: a.bg }}>
                     {a.icon}
                   </div>
-                  <span className="text-[11px] text-gray-500 font-medium">{a.label}</span>
+                  <span className="text-xs text-gray-500 font-medium">{a.label}</span>
                 </a>
               ))}
             </motion.div>
           )}
 
-          <div className="h-2.5 bg-[#F4F6F9]" />
-
           {/* Bio */}
           {profile.bio && (
-            <motion.div variants={item} className="px-5 py-4">
-              <h3 className="text-base font-bold text-gray-900 mb-2">À propos</h3>
-              <p className="text-[15px] text-gray-700 leading-relaxed">{profile.bio}</p>
+            <motion.div variants={item} className="px-5 pt-4 pb-4">
+              <h3 className="text-base font-bold text-gray-900 mb-2">{profile.bio_title || 'À propos'}</h3>
+              <p className="text-base text-gray-700 leading-relaxed">{profile.bio}</p>
             </motion.div>
           )}
 
-          {/* Location — standalone */}
+          {/* Location */}
           {profile.location && (
             <motion.div variants={item} className={`px-5 flex items-center gap-2 ${profile.bio ? 'pt-0 pb-4' : 'py-4'}`}>
               <MapPin className="w-5 h-5 flex-shrink-0" style={{ color: accent }} />
@@ -141,50 +166,119 @@ export function PublicProfile({ profile, showBranding }: PublicProfileProps) {
             </motion.div>
           )}
 
-          {(profile.bio || profile.location) && <div className="h-2.5 bg-[#F4F6F9]" />}
-
-          {/* All contacts + links grid — no circles, just icons + labels */}
-          {hasGrid && (
-            <motion.div variants={item} className="px-5 py-5">
-              <div className="grid grid-cols-4 gap-x-3 gap-y-5">
-                {phones.map((phone) => (
-                  <a key={phone.id} href={`tel:${phone.number}`} target="_blank" rel="noopener noreferrer"
-                    className="flex flex-col items-center gap-1.5 active:scale-95 transition-transform">
-                    <Phone size={28} style={{ color: accent }} strokeWidth={1.8} />
-                    <span className="text-[11px] text-gray-500 font-medium text-center leading-tight">{phone.label}</span>
-                  </a>
-                ))}
-                {emails.map((em) => (
-                  <a key={em.id} href={`mailto:${em.email}`} target="_blank" rel="noopener noreferrer"
-                    className="flex flex-col items-center gap-1.5 active:scale-95 transition-transform">
-                    <Mail size={28} style={{ color: accent }} strokeWidth={1.8} />
-                    <span className="text-[11px] text-gray-500 font-medium text-center leading-tight">{em.label}</span>
-                  </a>
-                ))}
-                {links.map((link) => {
-                  const slug = link.platform.toLowerCase()
-                  const color = PLATFORM_COLORS[slug] || accent
-                  return (
-                    <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer"
-                      className="flex flex-col items-center gap-1.5 active:scale-95 transition-transform">
-                      <BrandIcon platform={slug} color={color} size={28} />
-                      <span className="text-[11px] text-gray-500 font-medium text-center leading-tight">{link.title}</span>
-                    </a>
-                  )
-                })}
+          {/* Contacts & links — toggle grille/liste */}
+          {hasContacts && (
+            <motion.div variants={item} className="px-5 pb-5">
+              {/* Toggle */}
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-sm font-semibold text-gray-600">Contacts & liens</span>
+                <div className="flex items-center bg-gray-100 rounded-lg p-0.5">
+                  <button
+                    onClick={() => setViewMode('grid')}
+                    className={`p-1.5 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-white shadow-sm text-gray-700' : 'text-gray-400'}`}
+                  >
+                    <LayoutGrid size={15} />
+                  </button>
+                  <button
+                    onClick={() => setViewMode('list')}
+                    className={`p-1.5 rounded-md transition-colors ${viewMode === 'list' ? 'bg-white shadow-sm text-gray-700' : 'text-gray-400'}`}
+                  >
+                    <List size={15} />
+                  </button>
+                </div>
               </div>
+
+              {/* Vue grille */}
+              {viewMode === 'grid' && (
+                <div className="grid grid-cols-4 gap-x-3 gap-y-5">
+                  {phones.map((phone, i) => (
+                    <a key={phone.id ?? `phone-${i}`} href={`tel:${phone.number}`} target="_blank" rel="noopener noreferrer"
+                      className="flex flex-col items-center gap-1.5 active:scale-95 transition-transform">
+                      <Phone size={28} style={{ color: accent }} strokeWidth={1.8} />
+                      <span className="text-xs text-gray-500 font-medium text-center leading-tight">{phone.label}</span>
+                    </a>
+                  ))}
+                  {emails.map((em, i) => (
+                    <a key={em.id ?? `email-${i}`} href={`mailto:${em.email}`} target="_blank" rel="noopener noreferrer"
+                      className="flex flex-col items-center gap-1.5 active:scale-95 transition-transform">
+                      <Mail size={28} style={{ color: accent }} strokeWidth={1.8} />
+                      <span className="text-xs text-gray-500 font-medium text-center leading-tight">{em.label}</span>
+                    </a>
+                  ))}
+                  {links.map((link, i) => {
+                    const slug = link.platform.toLowerCase()
+                    const color = PLATFORM_COLORS[slug] || accent
+                    return (
+                      <a key={link.id ?? `link-${i}`} href={link.url} target="_blank" rel="noopener noreferrer"
+                        className="flex flex-col items-center gap-1.5 active:scale-95 transition-transform">
+                        <BrandIcon platform={slug} color={color} size={28} />
+                        <span className="text-xs text-gray-500 font-medium text-center leading-tight">{link.title}</span>
+                      </a>
+                    )
+                  })}
+                </div>
+              )}
+
+              {/* Vue liste */}
+              {viewMode === 'list' && (
+                <div className="flex flex-col divide-y divide-gray-100">
+                  {phones.map((phone, i) => (
+                    <div key={phone.id ?? `phone-${i}`} className="flex items-center gap-3 py-3">
+                      <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${accent}18` }}>
+                        <Phone size={18} style={{ color: accent }} strokeWidth={1.8} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-gray-400 font-medium">{phone.label}</p>
+                        <a href={`tel:${phone.number}`} className="text-sm font-semibold text-gray-800 truncate block hover:underline">
+                          {phone.number}
+                        </a>
+                      </div>
+                      <CopyButton text={phone.number} />
+                    </div>
+                  ))}
+                  {emails.map((em, i) => (
+                    <div key={em.id ?? `email-${i}`} className="flex items-center gap-3 py-3">
+                      <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${accent}18` }}>
+                        <Mail size={18} style={{ color: accent }} strokeWidth={1.8} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-gray-400 font-medium">{em.label}</p>
+                        <a href={`mailto:${em.email}`} className="text-sm font-semibold text-gray-800 truncate block hover:underline">
+                          {em.email}
+                        </a>
+                      </div>
+                      <CopyButton text={em.email} />
+                    </div>
+                  ))}
+                  {links.map((link, i) => {
+                    const slug = link.platform.toLowerCase()
+                    const color = PLATFORM_COLORS[slug] || accent
+                    return (
+                      <div key={link.id ?? `link-${i}`} className="flex items-center gap-3 py-3">
+                        <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${color}18` }}>
+                          <BrandIcon platform={slug} color={color} size={18} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs text-gray-400 font-medium">{link.title}</p>
+                          <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-gray-800 truncate block hover:underline">
+                            {link.url.replace(/^https?:\/\//, '')}
+                          </a>
+                        </div>
+                        <CopyButton text={link.url} />
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
             </motion.div>
           )}
 
-          {showBranding && (
-            <motion.div variants={item} className="pb-3">
-              <BrandingFooter />
-            </motion.div>
-          )}
         </motion.div>
+
+        {showBranding && <div className="mt-4 mb-2"><BrandingFooter /></div>}
       </div>
 
-      <AddContactFab username={profile.username} accentColor={accent} />
+      <AddContactFab username={profile.username} accentColor={accent} contrastColor={textColor} />
     </div>
   )
 }

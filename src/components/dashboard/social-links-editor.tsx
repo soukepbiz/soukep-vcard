@@ -102,7 +102,7 @@ export function SocialLinksEditor({ links, onChange, maxLinks }: SocialLinksEdit
                   }`}
                 >
                   <PlatformIcon id={p.id} color={added ? '#9CA3AF' : p.color} />
-                  <span className="text-[10px] text-gray-500 font-medium leading-tight text-center">{p.label}</span>
+                  <span className="text-xs text-gray-500 font-medium leading-tight text-center">{p.label}</span>
                 </button>
               )
             })}

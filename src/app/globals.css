@@ -1,10 +1,36 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #111827;
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: "Outfit", sans-serif;
+  --font-mono: "Outfit", sans-serif;
+}
 
-  /* Soukep Brand Blues */
+:root {
+  --radius: 0.75rem;
+
+  /* Light Mode */
+  --background: #F4F6F9;
+  --foreground: #111827;
+  --card: #FFFFFF;
+  --card-foreground: #111827;
+  --popover: #FFFFFF;
+  --popover-foreground: #111827;
+  --primary: #0099FF;
+  --primary-foreground: #FFFFFF;
+  --secondary: #E6F4FF;
+  --secondary-foreground: #0077CC;
+  --muted: #E6F4FF;
+  --muted-foreground: #0077CC;
+  --accent: #0077CC;
+  --accent-foreground: #FFFFFF;
+  --destructive: #EF4444;
+  --border: rgba(0, 153, 255, 0.15);
+  --input: #E5E7EB;
+  --ring: #0099FF;
+
+  /* Brand colors */
   --brand: #0099FF;
   --brand-dark: #0077CC;
   --brand-light: #33ADFF;
@@ -13,31 +39,50 @@
   --brand-200: #80C2FF;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-
-  --color-brand: var(--brand);
-  --color-brand-dark: var(--brand-dark);
-  --color-brand-light: var(--brand-light);
-  --color-brand-50: var(--brand-50);
-  --color-brand-100: var(--brand-100);
-  --color-brand-200: var(--brand-200);
+.dark {
+  --background: #0A0F14;
+  --foreground: #E6F7FD;
+  --card: #0D1419;
+  --card-foreground: #E6F7FD;
+  --popover: #0D1419;
+  --popover-foreground: #E6F7FD;
+  --primary: #0099FF;
+  --primary-foreground: #00171F;
+  --secondary: #1A2832;
+  --secondary-foreground: #E6F7FD;
+  --muted: #1A2832;
+  --muted-foreground: #8BA3B0;
+  --accent: #0077CC;
+  --accent-foreground: #E6F7FD;
+  --destructive: #EF4444;
+  --border: rgba(0, 153, 255, 0.15);
+  --input: rgba(255, 255, 255, 0.1);
+  --ring: #0099FF;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@layer base {
+  * {
+    border-color: var(--border);
+    outline-color: var(--ring);
+    outline-width: 2px;
+    outline-offset: 2px;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: "Outfit", system-ui, -apple-system, sans-serif;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 * { box-sizing: border-box; }
-
-html { scroll-behavior: smooth; }
 
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }

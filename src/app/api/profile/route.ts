@@ -3,6 +3,32 @@ import { NextResponse } from 'next/server'
 import { TIER_LIMITS } from '@/lib/constants'
 import { isPremium } from '@/lib/utils'
 
+const ALLOWED_FIELDS = [
+  'username', 'first_name', 'last_name', 'full_name', 'job_title', 'company', 'bio', 'bio_title',
+  'avatar_url', 'cover_url', 'social_links', 'phone_numbers', 'emails',
+  'location', 'accent_color', 'text_color', 'is_published',
+]
+
+export async function GET() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+  }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('subscription_type, subscription_expires_at')
+    .eq('id', user.id)
+    .single()
+
+  return NextResponse.json({
+    email: user.email,
+    profile,
+  })
+}
+
 export async function PATCH(request: Request) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -13,7 +39,6 @@ export async function PATCH(request: Request) {
 
   const body = await request.json()
 
-  // Fetch current subscription to enforce limits
   const { data: currentProfile } = await supabase
     .from('profiles')
     .select('subscription_type, subscription_expires_at')
@@ -34,12 +59,20 @@ export async function PATCH(request: Request) {
     )
   }
 
-  // Prevent role escalation
-  const { role: _role, id: _id, created_at: _ca, ...updateData } = body
+  // Whitelist only updatable fields
+  const updateData: Record<string, unknown> = {}
+  for (const field of ALLOWED_FIELDS) {
+    if (field in body) updateData[field] = body[field]
+  }
 
   // Prevent non-premium users from setting custom colors
-  if (!premium && updateData.accent_color) {
+  if (!premium) {
     delete updateData.accent_color
+    delete updateData.text_color
+  }
+
+  if (Object.keys(updateData).length === 0) {
+    return NextResponse.json({ success: true })
   }
 
   const { error } = await supabase

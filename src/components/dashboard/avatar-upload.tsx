@@ -58,7 +58,7 @@ export function AvatarUpload({ userId, currentUrl, onUpload }: AvatarUploadProps
                 className="absolute inset-0 flex flex-col items-center justify-center gap-1 hover:bg-gray-50 transition-colors"
               >
                 <Camera className="w-7 h-7 text-gray-400" />
-                <span className="text-[10px] text-gray-400 font-medium">Ajouter</span>
+                <span className="text-xs text-gray-400 font-medium">Ajouter</span>
               </button>
             )}
             {uploading && (

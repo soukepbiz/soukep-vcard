@@ -59,7 +59,7 @@ export function CoverUpload({ userId, currentUrl, onUpload }: CoverUploadProps) 
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
               <ImageIcon className="w-8 h-8 text-gray-400" />
               <span className="text-xs text-gray-400 font-medium">Image de couverture</span>
-              <span className="text-[11px] text-gray-300">Cliquez pour choisir</span>
+              <span className="text-xs text-gray-300">Cliquez pour choisir</span>
             </div>
           )}
           {!currentUrl && (

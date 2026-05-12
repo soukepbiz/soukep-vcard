@@ -23,10 +23,13 @@ export interface ProfileEmail {
 export interface Profile {
   id: string
   username: string
+  first_name: string | null
+  last_name: string | null
   full_name: string | null
   job_title: string | null
   company: string | null
   bio: string | null
+  bio_title: string | null
   avatar_url: string | null
   cover_url: string | null
   social_links: SocialLink[]
@@ -34,6 +37,7 @@ export interface Profile {
   emails: ProfileEmail[]
   location: string | null
   accent_color: string | null
+  text_color: string | null
   is_published: boolean
   subscription_type: 'free' | 'premium' | 'lifetime'
   subscription_expires_at: string | null
