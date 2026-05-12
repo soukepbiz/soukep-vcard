@@ -76,7 +76,7 @@ function normalizeUrl(url: string): string {
 export function PublicProfile({ profile, showBranding }: PublicProfileProps) {
   const accent = resolveAccent(profile.accent_color)
   const textColor = profile.text_color || '#FFFFFF'
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
 
   useEffect(() => {
     const prev = document.body.style.backgroundColor
@@ -97,18 +97,18 @@ export function PublicProfile({ profile, showBranding }: PublicProfileProps) {
 
   if (phones[0]) quickActions.push({
     key: 'phone', href: `tel:${phones[0].number}`, bg: accent,
-    icon: <Phone size={22} color={textColor} strokeWidth={2.5} />, label: 'Appeler',
+    icon: <Phone size={18} color={textColor} strokeWidth={2.5} />, label: 'Appeler',
   })
   if (emails[0]) quickActions.push({
     key: 'email', href: `mailto:${emails[0].email}`, bg: accent,
-    icon: <Mail size={22} color={textColor} strokeWidth={2.5} />, label: 'Email',
+    icon: <Mail size={18} color={textColor} strokeWidth={2.5} />, label: 'Email',
   })
   links.slice(0, 3).forEach((link) => {
     const slug = link.platform.toLowerCase()
     const bg = PLATFORM_COLORS[slug] || accent
     quickActions.push({
       key: link.id, href: normalizeUrl(link.url), bg,
-      icon: <BrandIcon platform={slug} color={textColor} size={22} />, label: link.title,
+      icon: <BrandIcon platform={slug} color={textColor} size={18} />, label: link.title,
     })
   })
 
@@ -152,15 +152,15 @@ export function PublicProfile({ profile, showBranding }: PublicProfileProps) {
 
           {/* Quick action circles */}
           {quickActions.length > 0 && (
-            <motion.div variants={item} className="flex items-start justify-center gap-5 px-6 pb-3 flex-wrap">
+            <motion.div variants={item} className="flex items-start justify-center gap-2.5 px-4 pb-3 flex-nowrap overflow-x-auto">
               {quickActions.map((a) => (
                 <a key={a.key} href={a.href} target="_blank" rel="noopener noreferrer"
-                  className="flex flex-col items-center gap-1.5">
-                  <div className="w-14 h-14 rounded-full flex items-center justify-center shadow-md active:scale-95 transition-transform"
+                  className="flex flex-col items-center gap-1 flex-shrink-0">
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center shadow-md active:scale-95 transition-transform"
                     style={{ backgroundColor: a.bg }}>
                     {a.icon}
                   </div>
-                  <span className="text-xs text-gray-500 font-medium">{a.label}</span>
+                  <span className="text-xs text-gray-500 font-medium whitespace-nowrap">{a.label}</span>
                 </a>
               ))}
             </motion.div>
@@ -206,7 +206,7 @@ export function PublicProfile({ profile, showBranding }: PublicProfileProps) {
 
               {/* Vue grille */}
               {viewMode === 'grid' && (
-                <div className="grid grid-cols-4 gap-x-3 gap-y-5">
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-x-3 gap-y-5">
                   {phones.map((phone, i) => (
                     <a key={phone.id ?? `phone-${i}`} href={`tel:${phone.number}`} target="_blank" rel="noopener noreferrer"
                       className="flex flex-col items-center gap-1.5 active:scale-95 transition-transform">
@@ -244,7 +244,7 @@ export function PublicProfile({ profile, showBranding }: PublicProfileProps) {
                         <Phone size={18} style={{ color: accent }} strokeWidth={1.8} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs text-gray-400 font-medium">{phone.label}</p>
+                        <p className="text-xs text-gray-400 font-medium truncate">{phone.label}</p>
                         <a href={`tel:${phone.number}`} className="text-sm font-semibold text-gray-800 truncate block hover:underline">
                           {phone.number}
                         </a>
@@ -258,7 +258,7 @@ export function PublicProfile({ profile, showBranding }: PublicProfileProps) {
                         <Mail size={18} style={{ color: accent }} strokeWidth={1.8} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs text-gray-400 font-medium">{em.label}</p>
+                        <p className="text-xs text-gray-400 font-medium truncate">{em.label}</p>
                         <a href={`mailto:${em.email}`} className="text-sm font-semibold text-gray-800 truncate block hover:underline">
                           {em.email}
                         </a>
@@ -275,7 +275,7 @@ export function PublicProfile({ profile, showBranding }: PublicProfileProps) {
                           <BrandIcon platform={slug} color={color} size={18} />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs text-gray-400 font-medium">{link.title}</p>
+                          <p className="text-xs text-gray-400 font-medium truncate">{link.title}</p>
                           <a href={normalizeUrl(link.url)} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-gray-800 truncate block hover:underline">
                             {link.url.replace(/^https?:\/\//, '')}
                           </a>

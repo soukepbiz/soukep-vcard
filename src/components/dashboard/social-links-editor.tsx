@@ -86,6 +86,28 @@ export function SocialLinksEditor({ links, onChange, maxLinks }: SocialLinksEdit
     setNewUrl(p.prefix)
   }
 
+  function handlePasteUrl(text: string, platformId: string) {
+    const p = PLATFORMS.find((pl) => pl.id === platformId)!
+    let cleanedText = text.trim()
+
+    if (cleanedText.startsWith('https://') || cleanedText.startsWith('http://')) {
+      try {
+        const url = new URL(cleanedText)
+        const pathname = url.pathname
+        const search = url.search
+        const hash = url.hash
+        cleanedText = pathname + search + hash
+        if (cleanedText.startsWith('/')) {
+          cleanedText = cleanedText.substring(1)
+        }
+      } catch {
+        // Si ce n'est pas une URL valide, utiliser le texte tel quel
+      }
+    }
+
+    return p.prefix + cleanedText
+  }
+
   function confirmAdd() {
     if (!addingPlatform || !newUrl) return
     onChange([...links, { id: nanoid(), platform: addingPlatform, title: newTitle, url: newUrl, order: links.length }])
@@ -154,6 +176,12 @@ export function SocialLinksEditor({ links, onChange, maxLinks }: SocialLinksEdit
                 placeholder={p.placeholder}
                 value={newUrl.startsWith(p.prefix) ? newUrl.slice(p.prefix.length) : newUrl}
                 onChange={(e) => setNewUrl(p.prefix + e.target.value)}
+                onPaste={(e) => {
+                  e.preventDefault()
+                  const pastedText = e.clipboardData.getData('text')
+                  const cleanedUrl = handlePasteUrl(pastedText, addingPlatform)
+                  setNewUrl(cleanedUrl)
+                }}
                 className="h-10 flex-1 bg-white px-3 text-sm focus:outline-none min-w-0"
               />
             </div>
@@ -207,6 +235,12 @@ export function SocialLinksEditor({ links, onChange, maxLinks }: SocialLinksEdit
                                 type="url"
                                 value={editUrl}
                                 onChange={(e) => setEditUrl(e.target.value)}
+                                onPaste={(e) => {
+                                  e.preventDefault()
+                                  const pastedText = e.clipboardData.getData('text')
+                                  const cleanedUrl = handlePasteUrl(pastedText, link.platform)
+                                  setEditUrl(cleanedUrl)
+                                }}
                                 placeholder={p?.placeholder || 'https://...'}
                                 className="h-9 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#0099FF]"
                               />

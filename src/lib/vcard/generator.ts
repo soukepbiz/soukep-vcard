@@ -4,6 +4,42 @@ function escapeVCard(str: string): string {
   return str.replace(/[,;\\]/g, (c) => `\\${c}`).replace(/\n/g, '\\n')
 }
 
+const NATIVE_SCHEMES: Record<string, (identifier: string) => string> = {
+  facebook: (id) => `fb://profile/${id}`,
+  instagram: (id) => `instagram://user?username=${id}`,
+  tiktok: (id) => `tiktok://user/@${id}`,
+  snapchat: (id) => `snapchat://add/${id}`,
+  linkedin: (url) => url.includes('linkedin.com') ? url : `https://linkedin.com/in/${url}`,
+  twitter: (id) => `https://x.com/${id}`,
+  whatsapp: (number) => `https://wa.me/${number}`,
+  telegram: (id) => `https://t.me/${id}`,
+  youtube: (channel) => `https://youtube.com/@${channel}`,
+  github: (username) => `https://github.com/${username}`,
+  spotify: (artist) => `spotify:artist:${artist}`,
+  twitch: (channel) => `https://twitch.tv/${channel}`,
+  pinterest: (username) => `https://pinterest.com/${username}`,
+  discord: (server) => `https://discord.gg/${server}`,
+}
+
+function getNativeUrl(platform: string, url: string): string {
+  const platformLower = platform.toLowerCase()
+  if (!NATIVE_SCHEMES[platformLower]) return url
+
+  try {
+    const urlObj = new URL(url)
+    const pathname = urlObj.pathname
+    let identifier = pathname.replace(/^\//, '').split('/')[0]
+
+    if (identifier) {
+      return NATIVE_SCHEMES[platformLower](identifier)
+    }
+  } catch {
+    // Fallback to original URL if parsing fails
+  }
+
+  return url
+}
+
 export async function generateVCard(profile: Profile): Promise<string> {
   const lines: string[] = ['BEGIN:VCARD', 'VERSION:3.0']
 
@@ -50,26 +86,14 @@ export async function generateVCard(profile: Profile): Promise<string> {
     }
   }
 
-  // Social links — use URL fields + include in NOTE
-  const socialNotes: string[] = []
+  // Social links — use native schemes for iOS/Android and standard URLs as fallback
   for (const link of profile.social_links) {
     if (link.url) {
-      lines.push(`URL;TYPE=${escapeVCard(link.platform.toUpperCase())}:${link.url}`)
-      socialNotes.push(`${link.title}: ${link.url}`)
+      const nativeUrl = getNativeUrl(link.platform, link.url)
+      lines.push(`URL;TYPE=${escapeVCard(link.platform.toUpperCase())}:${nativeUrl}`)
     }
   }
 
-  if (socialNotes.length > 0) {
-    const existingNote = lines.find((l) => l.startsWith('NOTE:'))
-    if (existingNote) {
-      const idx = lines.indexOf(existingNote)
-      lines[idx] = `${existingNote}\\n---\\n${socialNotes.join('\\n')}`
-    } else {
-      lines.push(`NOTE:${socialNotes.join('\\n')}`)
-    }
-  }
-
-  lines.push(`X-SOCIALPROFILE;USERNAME=${profile.username}:vcard.soukep.com/${profile.username}`)
   lines.push('END:VCARD')
 
   return lines.join('\r\n')
