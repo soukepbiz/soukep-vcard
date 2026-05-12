@@ -15,10 +15,10 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
   const accent = resolveAccent(profile.accent_color)
 
   return (
-    <div className="relative px-3 pt-3">
-      {/* Cover with rounded corners */}
+    <div className="relative">
+      {/* Cover — top full-width, only bottom corners rounded */}
       <div
-        className="h-44 w-full overflow-hidden rounded-2xl"
+        className="h-44 w-full overflow-hidden rounded-b-3xl"
         style={
           profile.cover_url
             ? undefined
@@ -30,12 +30,12 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
             src={profile.cover_url}
             alt="Bannière"
             fill
-            className="object-cover rounded-2xl"
+            className="object-cover"
             priority
             sizes="100vw"
           />
         )}
-        <div className="absolute inset-3 rounded-2xl bg-gradient-to-t from-black/25 to-transparent" />
+        <div className="absolute inset-0 rounded-b-3xl bg-gradient-to-t from-black/20 to-transparent" />
       </div>
 
       {/* Avatar overlapping cover */}

@@ -5,6 +5,7 @@ import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-p
 import type { SocialLink } from '@/types/profile'
 import { nanoid } from 'nanoid'
 import { BRAND_PATHS } from '@/lib/brand-icons'
+import { Globe, Link as LinkIcon } from 'lucide-react'
 
 const PLATFORMS = [
   { id: 'whatsapp',   label: 'WhatsApp',   color: '#25D366', placeholder: 'https://wa.me/33600000000' },
@@ -27,6 +28,8 @@ const PLATFORMS = [
 
 
 function PlatformIcon({ id, color }: { id: string; color: string }) {
+  if (id === 'website') return <Globe className="w-5 h-5" style={{ color }} strokeWidth={1.8} />
+  if (id === 'custom') return <LinkIcon className="w-5 h-5" style={{ color }} strokeWidth={1.8} />
   const path = BRAND_PATHS[id]
   if (path) {
     return (
@@ -35,11 +38,7 @@ function PlatformIcon({ id, color }: { id: string; color: string }) {
       </svg>
     )
   }
-  return (
-    <svg className="w-5 h-5" fill="none" stroke={color} viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-    </svg>
-  )
+  return <Globe className="w-5 h-5" style={{ color }} strokeWidth={1.8} />
 }
 
 interface SocialLinksEditorProps {

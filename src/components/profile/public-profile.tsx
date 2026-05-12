@@ -5,8 +5,8 @@ import { ProfileHeader } from './profile-header'
 import { AddContactFab } from './add-contact-fab'
 import { BrandingFooter } from './branding-footer'
 import type { Profile } from '@/types/profile'
-import { MapPin, Briefcase, Building2, Phone, Mail } from 'lucide-react'
-import { BRAND_PATHS, getContrastColor, resolveAccent } from '@/lib/brand-icons'
+import { MapPin, Briefcase, Building2, Phone, Mail, Globe } from 'lucide-react'
+import { BRAND_PATHS, resolveAccent } from '@/lib/brand-icons'
 
 interface PublicProfileProps {
   profile: Profile
@@ -22,20 +22,17 @@ const PLATFORM_COLORS: Record<string, string> = {
 }
 
 function BrandIcon({ platform, color, size = 24 }: { platform: string; color: string; size?: number }) {
-  const slug = platform.toLowerCase() === 'twitter' ? 'twitter' : platform.toLowerCase()
+  const slug = platform.toLowerCase()
+  if (slug === 'website') return <Globe width={size} height={size} color={color} strokeWidth={1.8} />
   const path = BRAND_PATHS[slug]
   if (path) {
     return (
-      <svg viewBox="0 0 24 24" width={size} height={size} style={{ fill: color }} xmlns="http://www.w3.org/2000/svg">
+      <svg viewBox="0 0 24 24" width={size} height={size} style={{ fill: color }}>
         <path d={path} />
       </svg>
     )
   }
-  return (
-    <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke={color} strokeWidth={2} xmlns="http://www.w3.org/2000/svg">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-    </svg>
-  )
+  return <Globe width={size} height={size} color={color} strokeWidth={1.8} />
 }
 
 const container = {
@@ -46,7 +43,6 @@ const item = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }
 
 export function PublicProfile({ profile, showBranding }: PublicProfileProps) {
   const accent = resolveAccent(profile.accent_color)
-  const contrastText = getContrastColor(accent)
   const phones = profile.phone_numbers.filter((p) => p.number)
   const emails = (profile.emails || []).filter((e) => e.email)
   const links = [...profile.social_links].sort((a, b) => a.order - b.order)
@@ -57,12 +53,12 @@ export function PublicProfile({ profile, showBranding }: PublicProfileProps) {
 
   if (phones[0]) quickActions.push({
     key: 'phone', href: `tel:${phones[0].number}`, bg: accent,
-    icon: <Phone size={22} color={contrastText} strokeWidth={2.5} />,
+    icon: <Phone size={22} color="#FFFFFF" strokeWidth={2.5} />,
     label: 'Appeler',
   })
   if (emails[0]) quickActions.push({
     key: 'email', href: `mailto:${emails[0].email}`, bg: accent,
-    icon: <Mail size={22} color={contrastText} strokeWidth={2.5} />,
+    icon: <Mail size={22} color="#FFFFFF" strokeWidth={2.5} />,
     label: 'Email',
   })
   links.slice(0, 3).forEach((link) => {
@@ -70,7 +66,7 @@ export function PublicProfile({ profile, showBranding }: PublicProfileProps) {
     const bg = PLATFORM_COLORS[slug] || accent
     quickActions.push({
       key: link.id, href: link.url, bg,
-      icon: <BrandIcon platform={slug} color={getContrastColor(bg)} size={22} />,
+      icon: <BrandIcon platform={slug} color="#FFFFFF" size={22} />,
       label: link.title,
     })
   })
@@ -179,7 +175,7 @@ export function PublicProfile({ profile, showBranding }: PublicProfileProps) {
         </motion.div>
       </div>
 
-      <AddContactFab username={profile.username} accentColor={accent} contrastColor={contrastText} />
+      <AddContactFab username={profile.username} accentColor={accent} />
     </div>
   )
 }

@@ -2,7 +2,7 @@
 
 import type { SocialLink } from '@/types/profile'
 import { BRAND_PATHS } from '@/lib/brand-icons'
-import { ExternalLink } from 'lucide-react'
+import { ExternalLink, Globe } from 'lucide-react'
 
 const PLATFORM_COLORS: Record<string, string> = {
   linkedin: '#0A66C2', instagram: '#E1306C', tiktok: '#010101',
@@ -21,13 +21,16 @@ export function SocialLinkItem({ link, accentColor }: SocialLinkItemProps) {
   const slug = link.platform.toLowerCase()
   const color = PLATFORM_COLORS[slug] || accentColor
   const path = BRAND_PATHS[slug]
+  const isWebsite = slug === 'website' || slug === 'custom'
 
   return (
     <a href={link.url} target="_blank" rel="noopener noreferrer"
       className="group flex items-center gap-3.5 w-full px-4 py-3.5 bg-white rounded-2xl border border-gray-100 hover:border-gray-200 hover:shadow-md active:scale-[0.99] transition-all duration-200">
       <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
         style={{ backgroundColor: `${color}15` }}>
-        {path ? (
+        {isWebsite ? (
+          <Globe className="w-5 h-5" style={{ color }} strokeWidth={1.8} />
+        ) : path ? (
           <svg viewBox="0 0 24 24" className="w-5 h-5" style={{ fill: color }}>
             <path d={path} />
           </svg>
