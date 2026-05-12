@@ -19,17 +19,20 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
     <div className="relative">
       {/* Cover — top full-width, only bottom corners rounded */}
       <div
-        className={`h-52 w-full overflow-hidden relative ${coverRadius}`}
+        className={`w-full overflow-hidden relative ${coverRadius}`}
         style={
           profile.cover_url
             ? {
                 backgroundImage: `url('${profile.cover_url}')`,
-                backgroundSize: 'contain',
+                backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 backgroundRepeat: 'no-repeat',
-                backgroundColor: accent,
+                height: '200px',
               }
-            : { background: `linear-gradient(135deg, ${accent} 0%, ${accent}99 50%, ${accent}44 100%)` }
+            : {
+                background: `linear-gradient(135deg, ${accent} 0%, ${accent}99 50%, ${accent}44 100%)`,
+                height: '200px',
+              }
         }
       >
         <div className={`absolute inset-0 ${coverRadius} bg-gradient-to-t from-black/15 to-transparent`} />
