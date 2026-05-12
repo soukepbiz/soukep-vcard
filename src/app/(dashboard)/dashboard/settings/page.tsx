@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { LogOut, Trash2, Clock } from 'lucide-react'
 import { isPremium } from '@/lib/utils'
 import { SubscriptionUpgradeModal } from '@/components/subscription/upgrade-modal'
 
@@ -13,12 +14,38 @@ interface User {
   email?: string
 }
 
+function getExpirationDaysLeft(expiresAt: string | null): number | null {
+  if (!expiresAt) return null
+  const days = Math.ceil((new Date(expiresAt).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+  return Math.max(0, days)
+}
+
+function formatExpirationDate(dateStr: string | null): string {
+  if (!dateStr) return '—'
+  const date = new Date(dateStr)
+  return date.toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })
+}
+
+const BENEFITS = {
+  free: ['Profil de base', '5 liens maximum', 'Thème standard'],
+  premium: [
+    '∞ Liens illimités',
+    '🎨 Personnalisation complète (couleurs)',
+    '📊 Statistiques détaillées',
+    '🎯 Tracking des visiteurs',
+    '🌍 Géolocalisation',
+    'Support prioritaire',
+    'Pas de branding Soukep',
+  ],
+}
+
 export default function SettingsPage() {
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   useEffect(() => {
     const loadData = async () => {
@@ -70,66 +97,168 @@ export default function SettingsPage() {
   }
 
   const premium = isPremium(profile.subscription_type || 'free', profile.subscription_expires_at)
+  const daysLeft = getExpirationDaysLeft(profile.subscription_expires_at)
+  const isExpiringSoon = daysLeft !== null && daysLeft < 30
 
   return (
-    <div className="flex flex-col gap-6 max-w-lg">
+    <div className="flex flex-col gap-6 max-w-2xl">
       <h1 className="text-xl font-bold text-gray-900">Paramètres du compte</h1>
 
-      {/* Account info */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-5 flex flex-col gap-4">
-        <h2 className="text-sm font-semibold text-gray-900">Informations du compte</h2>
-        <div>
-          <p className="text-xs text-gray-500 mb-1">Email</p>
-          <p className="text-sm text-gray-800">{user?.email}</p>
-        </div>
-        <div>
-          <p className="text-xs text-gray-500 mb-1">Abonnement</p>
-          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
-            premium ? 'bg-[#B3DBFF] text-[#0077CC]' : 'bg-gray-100 text-gray-600'
-          }`}>
-            {profile?.subscription_type === 'lifetime' ? 'Lifetime' : premium ? 'Premium' : 'Free'}
-          </span>
-          {profile?.subscription_expires_at && (
-            <p className="text-xs text-gray-400 mt-1">
-              Expire le {new Date(profile.subscription_expires_at).toLocaleDateString('fr-FR')}
-            </p>
-          )}
+      {/* Compte */}
+      <div className="bg-white rounded-2xl border border-gray-200 p-6">
+        <h2 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wide text-gray-700">Compte</h2>
+        <div className="space-y-4">
+          <div>
+            <p className="text-xs text-gray-500 font-medium mb-1">Email</p>
+            <p className="text-sm text-gray-800 font-medium">{user?.email}</p>
+          </div>
+          <div>
+            <p className="text-xs text-gray-500 font-medium mb-1">Type de compte</p>
+            <span className={`inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-bold ${
+              profile?.subscription_type === 'lifetime'
+                ? 'bg-purple-100 text-purple-700'
+                : premium
+                  ? 'bg-[#B3DBFF] text-[#0077CC]'
+                  : 'bg-gray-100 text-gray-600'
+            }`}>
+              {profile?.subscription_type === 'lifetime' ? '⭐ Lifetime' : premium ? '✨ Premium' : 'Gratuit'}
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* Upgrade */}
-      {!premium && (
-        <div className="bg-gradient-to-br from-[#0099FF] to-[#0077CC] rounded-2xl p-5 text-white">
-          <h2 className="font-bold mb-1">Passer à Premium</h2>
-          <p className="text-sm text-[#E6F4FF] mb-4">
-            Liens illimités, personnalisation complète et statistiques de visite.
-          </p>
-          <ul className="text-sm text-[#E6F4FF] flex flex-col gap-1.5 mb-5">
-            {['Liens illimités', 'Couleurs personnalisées', 'Statistiques', 'Sans branding'].map((f) => (
-              <li key={f} className="flex items-center gap-2">
-                <svg className="w-4 h-4 text-[#80C2FF] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                {f}
-              </li>
-            ))}
-          </ul>
+      {/* Abonnement */}
+      <div className={`rounded-2xl border-2 p-6 ${
+        premium
+          ? 'bg-gradient-to-br from-[#F0F9FF] to-[#E6F4FF] border-[#B3DBFF]'
+          : 'bg-white border-gray-200'
+      }`}>
+        <div className="flex items-start justify-between mb-4">
+          <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wide text-gray-700">Mon abonnement</h2>
+          {isExpiringSoon && daysLeft !== null && (
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold bg-amber-100 text-amber-700 rounded-lg">
+              <Clock size={12} />
+              Expire dans {daysLeft}j
+            </span>
+          )}
+        </div>
+
+        {premium && (
+          <div className="bg-white rounded-xl p-4 mb-4 border border-[#B3DBFF]">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-semibold text-gray-700">Statut</span>
+              <span className="text-sm font-bold text-[#0077CC]">
+                {profile?.subscription_type === 'lifetime' ? 'À vie' : 'Actif jusqu\'au ' + formatExpirationDate(profile?.subscription_expires_at)}
+              </span>
+            </div>
+            {profile?.subscription_type !== 'lifetime' && (
+              <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-[#0099FF]"
+                  style={{
+                    width: daysLeft ? `${Math.min(100, Math.max(0, (daysLeft / 365) * 100))}%` : '0%',
+                  }}
+                />
+              </div>
+            )}
+          </div>
+        )}
+
+        {!premium ? (
+          <div>
+            <p className="text-sm text-gray-600 mb-4">
+              Débloquez l'accès complet à toutes les fonctionnalités Premium.
+            </p>
+            <button
+              onClick={() => setIsUpgradeModalOpen(true)}
+              className="w-full px-4 py-3 bg-gradient-to-r from-[#0099FF] to-[#0077CC] text-white font-semibold rounded-xl hover:opacity-90 transition-opacity"
+            >
+              Passer à Premium
+            </button>
+          </div>
+        ) : profile?.subscription_type !== 'lifetime' ? (
           <button
             onClick={() => setIsUpgradeModalOpen(true)}
-            className="inline-flex items-center justify-center h-11 px-6 bg-white text-[#0077CC] font-semibold rounded-xl text-sm hover:bg-[#E6F4FF] transition-colors"
+            className="w-full px-4 py-2 text-sm bg-white border border-[#0099FF] text-[#0077CC] font-semibold rounded-xl hover:bg-[#F0F9FF] transition-colors"
           >
-            Upgrader maintenant
+            Renouveler l'abonnement
           </button>
-        </div>
-      )}
+        ) : null}
+      </div>
 
-      {/* Danger zone */}
-      <div className="bg-white rounded-2xl border border-red-100 p-5 flex flex-col gap-3">
-        <h2 className="text-sm font-semibold text-red-700">Zone dangereuse</h2>
-        <p className="text-xs text-gray-500">La suppression du compte est irréversible.</p>
-        <button className="self-start px-4 py-2 text-sm text-red-600 border border-red-200 rounded-xl hover:bg-red-50 transition-colors">
-          Supprimer mon compte
+      {/* Avantages */}
+      <div className="bg-white rounded-2xl border border-gray-200 p-6">
+        <h2 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wide text-gray-700">Avantages</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Free */}
+          <div className="p-4 border border-gray-200 rounded-xl">
+            <p className="text-sm font-bold text-gray-700 mb-3">Plan Gratuit</p>
+            <ul className="space-y-2">
+              {BENEFITS.free.map((b) => (
+                <li key={b} className="flex items-start gap-2 text-xs text-gray-600">
+                  <span className="text-gray-400 mt-0.5">○</span>
+                  <span>{b}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          {/* Premium */}
+          <div className="p-4 bg-[#F0F9FF] border border-[#B3DBFF] rounded-xl">
+            <p className="text-sm font-bold text-[#0077CC] mb-3">Plan Premium</p>
+            <ul className="space-y-2">
+              {BENEFITS.premium.map((b) => (
+                <li key={b} className="flex items-start gap-2 text-xs text-[#0077CC] font-medium">
+                  <span className="text-[#0099FF] mt-0.5">✓</span>
+                  <span>{b}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      {/* Sécurité */}
+      <div className="bg-white rounded-2xl border border-gray-200 p-6">
+        <h2 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wide text-gray-700">Sécurité</h2>
+        <button className="flex items-center gap-2.5 px-4 py-3 text-sm font-medium text-red-600 border border-red-200 rounded-xl hover:bg-red-50 transition-colors">
+          <LogOut size={16} />
+          Déconnecter toutes les sessions
         </button>
+        <p className="text-xs text-gray-500 mt-2">Cela fermera votre session sur tous vos appareils.</p>
+      </div>
+
+      {/* Zone dangereuse */}
+      <div className="bg-white rounded-2xl border border-red-100 p-6">
+        <h2 className="text-sm font-bold text-red-700 mb-4 uppercase tracking-wide">Zone dangereuse</h2>
+        {!showDeleteConfirm ? (
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            className="flex items-center gap-2.5 px-4 py-3 text-sm font-medium text-red-600 border border-red-200 rounded-xl hover:bg-red-50 transition-colors"
+          >
+            <Trash2 size={16} />
+            Supprimer mon compte
+          </button>
+        ) : (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
+            <p className="text-sm font-semibold text-red-700 mb-3">Êtes-vous sûr ?</p>
+            <p className="text-xs text-red-600 mb-4">
+              Cette action est irréversible. Tous vos profils et données seront supprimés définitivement.
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="flex-1 px-3 py-2 text-sm border border-red-200 text-red-600 rounded-lg hover:bg-white transition-colors"
+              >
+                Annuler
+              </button>
+              <button
+                className="flex-1 px-3 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Confirmer la suppression
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Upgrade Modal */}

@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { isPremium } from '@/lib/utils'
+import { AnalyticsDashboard } from '@/components/analytics/analytics-dashboard'
 import Link from 'next/link'
 
 export default async function AnalyticsPage() {
@@ -14,7 +15,7 @@ export default async function AnalyticsPage() {
     .eq('id', user.id)
     .single()
 
-  const premium = profile ? isPremium(profile.subscription_type, profile.subscription_expires_at) : false
+  const premium = profile ? isPremium(profile.subscription_type || 'free', profile.subscription_expires_at) : false
 
   if (!premium) {
     return (
@@ -27,7 +28,7 @@ export default async function AnalyticsPage() {
         </div>
         <h2 className="text-xl font-bold text-gray-900">Statistiques Premium</h2>
         <p className="text-gray-500 max-w-xs">
-          Accédez aux statistiques de vues et clics sur vos liens avec un abonnement Premium.
+          Accédez aux statistiques détaillées de vos visiteurs avec un abonnement Premium.
         </p>
         <Link
           href="/dashboard/settings"
@@ -39,57 +40,80 @@ export default async function AnalyticsPage() {
     )
   }
 
+  // Fetch initial data for 30 days
   const { data: views } = await supabase
     .from('profile_views')
-    .select('viewed_at')
+    .select('*')
     .eq('profile_id', user.id)
     .gte('viewed_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
-    .order('viewed_at', { ascending: true })
+    .order('viewed_at', { ascending: false })
 
-  const totalViews = views?.length || 0
+  // Process data
+  const viewsList = views || []
 
-  // Group by day
-  const byDay: Record<string, number> = {}
-  views?.forEach((v) => {
+  // KPIs
+  const totalViews = viewsList.length
+  const uniqueIPs = new Set(viewsList.map(v => v.viewer_ip).filter(Boolean))
+  const uniqueVisitors = uniqueIPs.size
+  const countries = new Set(viewsList.map(v => v.country).filter(Boolean))
+  const countriesCount = countries.size
+  const lastView = viewsList[0]?.viewed_at || null
+
+  // Views by day
+  const viewsByDay: Record<string, number> = {}
+  viewsList.forEach(v => {
     const day = v.viewed_at.split('T')[0]
-    byDay[day] = (byDay[day] || 0) + 1
+    viewsByDay[day] = (viewsByDay[day] || 0) + 1
   })
 
-  return (
-    <div className="flex flex-col gap-6">
-      <h1 className="text-xl font-bold text-gray-900">Statistiques</h1>
+  // By hour
+  const byHour = Array(24).fill(0)
+  viewsList.forEach(v => {
+    const hour = new Date(v.viewed_at).getHours()
+    byHour[hour]++
+  })
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="bg-white rounded-2xl border border-gray-200 p-5">
-          <p className="text-3xl font-bold text-gray-900">{totalViews}</p>
-          <p className="text-sm text-gray-500 mt-1">Vues (30 jours)</p>
-        </div>
-        <div className="bg-white rounded-2xl border border-gray-200 p-5">
-          <p className="text-3xl font-bold text-gray-900">{Object.keys(byDay).length}</p>
-          <p className="text-sm text-gray-500 mt-1">Jours actifs</p>
-        </div>
-      </div>
+  // By device, browser, OS, country
+  const byDevice: Record<string, number> = {}
+  const byBrowser: Record<string, number> = {}
+  const byOS: Record<string, number> = {}
+  const byCountry: Record<string, number> = {}
 
-      <div className="bg-white rounded-2xl border border-gray-200 p-5">
-        <h2 className="text-sm font-medium text-gray-700 mb-4">Vues par jour (30 derniers jours)</h2>
-        <div className="flex items-end gap-1 h-32">
-          {Object.entries(byDay).slice(-30).map(([day, count]) => {
-            const max = Math.max(...Object.values(byDay), 1)
-            const height = Math.max((count / max) * 100, 4)
-            return (
-              <div key={day} className="flex-1 flex flex-col items-center gap-1 group" title={`${day}: ${count} vue(s)`}>
-                <div
-                  className="w-full bg-[#33ADFF] rounded-sm transition-all group-hover:bg-[#0099FF]"
-                  style={{ height: `${height}%` }}
-                />
-              </div>
-            )
-          })}
-          {Object.keys(byDay).length === 0 && (
-            <p className="text-sm text-gray-400 m-auto">Aucune vue pour l&apos;instant</p>
-          )}
-        </div>
-      </div>
-    </div>
-  )
+  viewsList.forEach(v => {
+    byDevice[v.device_type || 'unknown'] = (byDevice[v.device_type || 'unknown'] || 0) + 1
+    byBrowser[v.browser || 'unknown'] = (byBrowser[v.browser || 'unknown'] || 0) + 1
+    byOS[v.os || 'unknown'] = (byOS[v.os || 'unknown'] || 0) + 1
+    byCountry[v.country || 'unknown'] = (byCountry[v.country || 'unknown'] || 0) + 1
+  })
+
+  // Recent visitors
+  const recentVisitors = viewsList.slice(0, 50).map(v => ({
+    id: v.id,
+    viewedAt: v.viewed_at,
+    ip: v.viewer_ip,
+    country: v.country,
+    city: v.city,
+    deviceType: v.device_type,
+    browser: v.browser,
+    os: v.os,
+    referrer: v.referrer,
+  }))
+
+  const initialData = {
+    kpis: {
+      totalViews,
+      uniqueVisitors,
+      countries: countriesCount,
+      lastView,
+    },
+    viewsByDay,
+    byHour,
+    byDevice,
+    byBrowser,
+    byOS,
+    byCountry,
+    recentVisitors,
+  }
+
+  return <AnalyticsDashboard initialData={initialData} />
 }

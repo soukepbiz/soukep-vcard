@@ -2,7 +2,9 @@ export const dynamic = 'force-dynamic'
 
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
+import { headers } from 'next/headers'
 import { PublicProfile } from '@/components/profile/public-profile'
+import { parseUserAgent } from '@/lib/analytics/parser'
 import type { Profile } from '@/types/profile'
 import type { Metadata } from 'next'
 
@@ -58,10 +60,30 @@ export default async function PublicProfilePage({ params }: Props) {
 
   // Record view only for published profiles visited by non-owners
   if (profile.is_published && !isOwner) {
+    const headersList = await headers()
+    const ip = headersList.get('x-forwarded-for')?.split(',')[0]?.trim()
+      || headersList.get('x-real-ip')
+      || 'unknown'
+    const userAgent = headersList.get('user-agent') || ''
+    const referrer = headersList.get('referer') || null
+    const country = headersList.get('x-vercel-ip-country') || null
+    const city = headersList.get('x-vercel-ip-city') || null
+
+    const { deviceType, browser, os } = parseUserAgent(userAgent)
+
     supabase
       .from('profile_views')
-      .insert({ profile_id: profile.id })
-      .then(() => {})
+      .insert({
+        profile_id: profile.id,
+        viewer_ip: ip,
+        user_agent: userAgent,
+        referrer,
+        device_type: deviceType,
+        browser,
+        os,
+        country,
+        city,
+      })
   }
 
   const typedProfile: Profile = {
