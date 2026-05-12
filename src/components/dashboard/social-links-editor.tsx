@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'
 import type { SocialLink } from '@/types/profile'
 import { nanoid } from 'nanoid'
+import { BRAND_PATHS } from '@/lib/brand-icons'
 
 const PLATFORMS = [
   { id: 'whatsapp',   label: 'WhatsApp',   color: '#25D366', placeholder: 'https://wa.me/33600000000' },
@@ -24,19 +25,13 @@ const PLATFORMS = [
   { id: 'custom',     label: 'Lien perso', color: '#6B7280', placeholder: 'https://...' },
 ]
 
-const PLATFORM_ICONS: Record<string, string> = {
-  linkedin: 'linkedin', instagram: 'instagram', tiktok: 'tiktok', youtube: 'youtube',
-  facebook: 'facebook', twitter: 'x', telegram: 'telegram', whatsapp: 'whatsapp',
-  github: 'github', snapchat: 'snapchat', pinterest: 'pinterest', discord: 'discord',
-  twitch: 'twitch', spotify: 'spotify',
-}
 
 function PlatformIcon({ id, color }: { id: string; color: string }) {
-  const slug = PLATFORM_ICONS[id]
-  if (slug) {
+  const path = BRAND_PATHS[id]
+  if (path) {
     return (
-      <svg role="img" viewBox="0 0 24 24" className="w-5 h-5" style={{ fill: color }} xmlns="http://www.w3.org/2000/svg">
-        <use href={`/icons/simple-icons.svg#${slug}`} />
+      <svg viewBox="0 0 24 24" className="w-5 h-5" style={{ fill: color }}>
+        <path d={path} />
       </svg>
     )
   }
