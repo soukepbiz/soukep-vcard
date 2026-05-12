@@ -67,6 +67,12 @@ const BgPattern = ({ accent }: { accent: string }) => (
   </svg>
 )
 
+function normalizeUrl(url: string): string {
+  if (!url) return url
+  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('tel:') || url.startsWith('mailto:')) return url
+  return `https://${url}`
+}
+
 export function PublicProfile({ profile, showBranding }: PublicProfileProps) {
   const accent = resolveAccent(profile.accent_color)
   const textColor = profile.text_color || '#FFFFFF'
@@ -101,7 +107,7 @@ export function PublicProfile({ profile, showBranding }: PublicProfileProps) {
     const slug = link.platform.toLowerCase()
     const bg = PLATFORM_COLORS[slug] || accent
     quickActions.push({
-      key: link.id, href: link.url, bg,
+      key: link.id, href: normalizeUrl(link.url), bg,
       icon: <BrandIcon platform={slug} color={textColor} size={22} />, label: link.title,
     })
   })
@@ -219,7 +225,7 @@ export function PublicProfile({ profile, showBranding }: PublicProfileProps) {
                     const slug = link.platform.toLowerCase()
                     const color = PLATFORM_COLORS[slug] || accent
                     return (
-                      <a key={link.id ?? `link-${i}`} href={link.url} target="_blank" rel="noopener noreferrer"
+                      <a key={link.id ?? `link-${i}`} href={normalizeUrl(link.url)} target="_blank" rel="noopener noreferrer"
                         className="flex flex-col items-center gap-1.5 active:scale-95 transition-transform">
                         <BrandIcon platform={slug} color={color} size={28} />
                         <span className="text-xs text-gray-500 font-medium text-center leading-tight">{link.title}</span>
@@ -270,7 +276,7 @@ export function PublicProfile({ profile, showBranding }: PublicProfileProps) {
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-xs text-gray-400 font-medium">{link.title}</p>
-                          <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-gray-800 truncate block hover:underline">
+                          <a href={normalizeUrl(link.url)} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-gray-800 truncate block hover:underline">
                             {link.url.replace(/^https?:\/\//, '')}
                           </a>
                         </div>
