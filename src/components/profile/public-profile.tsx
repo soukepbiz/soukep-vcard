@@ -120,7 +120,7 @@ export function PublicProfile({ profile, showBranding }: PublicProfileProps) {
       <div className="relative max-w-md mx-auto bg-white min-h-screen">
         <ProfileHeader profile={profile} />
 
-        <motion.div variants={container} initial="hidden" animate="show" className="flex flex-col pt-8 pb-28">
+        <motion.div variants={container} initial="hidden" animate="show" className="flex flex-col pt-16 pb-28">
 
           {/* Identity */}
           {(profile.first_name || profile.last_name || profile.full_name || profile.job_title || profile.company) && (() => {
@@ -131,7 +131,7 @@ export function PublicProfile({ profile, showBranding }: PublicProfileProps) {
             return (
               <motion.div variants={item} className={`${alignmentClass} px-6 pb-3 pt-1`}>
                 {(profile.first_name || profile.last_name || profile.full_name) && (
-                  <h1 className="text-2xl sm:text-[26px] font-extrabold text-gray-900 leading-tight">
+                  <h1 className="text-[28px] font-extrabold text-gray-900 leading-tight">
                     {profile.first_name || profile.last_name
                       ? [profile.first_name, profile.last_name].filter(Boolean).join(' ')
                       : profile.full_name}
@@ -140,17 +140,17 @@ export function PublicProfile({ profile, showBranding }: PublicProfileProps) {
                 {profile.job_title && (
                   <div className={`flex items-center ${justifyClass} gap-1.5 mt-2`}>
                     <span
-                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs sm:text-xs font-semibold"
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold"
                       style={{ backgroundColor: accent, color: textColor }}
                     >
-                      <Briefcase className="w-3 h-3 sm:w-3 sm:h-3 flex-shrink-0" />
+                      <Briefcase className="w-4 h-4 flex-shrink-0" />
                       {profile.job_title}
                     </span>
                   </div>
                 )}
                 {profile.company && (
-                  <p className={`flex items-center ${justifyClass} gap-1.5 text-sm sm:text-base font-bold text-gray-800 mt-2`}>
-                    <Building2 className="w-3.5 sm:w-4 h-3.5 sm:h-4 flex-shrink-0" style={{ color: accent }} />
+                  <p className={`flex items-center ${justifyClass} gap-1.5 text-base font-bold text-gray-800 mt-2`}>
+                    <Building2 className="w-4 h-4 flex-shrink-0" style={{ color: accent }} />
                     {profile.company}
                   </p>
                 )}
