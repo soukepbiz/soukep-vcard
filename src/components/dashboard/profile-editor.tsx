@@ -54,7 +54,7 @@ interface ProfileEditorProps {
   profile: Profile
 }
 
-type Tab = 'info' | 'links' | 'theme'
+type Tab = 'info' | 'links' | 'theme' | 'display'
 
 export function ProfileEditor({ profile: initialProfile }: ProfileEditorProps) {
   const [profile, setProfile] = useState(initialProfile)
@@ -109,6 +109,7 @@ export function ProfileEditor({ profile: initialProfile }: ProfileEditorProps) {
     { id: 'info', label: 'Infos' },
     { id: 'links', label: 'Liens' },
     { id: 'theme', label: 'Thème' },
+    { id: 'display', label: 'Affichage' },
   ]
 
   const SaveButton = ({ full }: { full?: boolean }) => (
@@ -349,6 +350,63 @@ export function ProfileEditor({ profile: initialProfile }: ProfileEditorProps) {
             isPremium={premium}
             extractedColor={extractedColor}
           />
+          <SaveButton full />
+        </div>
+      )}
+
+      {tab === 'display' && (
+        <div className="flex flex-col gap-5">
+          <div>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Paramètres d'affichage</p>
+
+            {/* Header Alignment */}
+            <div className="flex flex-col gap-3 mb-6">
+              <label className="text-sm font-medium text-gray-700">Alignement du profil (nom, poste, entreprise)</label>
+              <div className="grid grid-cols-3 gap-2">
+                {(['left', 'center', 'right'] as const).map((align) => (
+                  <button
+                    key={align}
+                    onClick={() => update('header_alignment' as any, align)}
+                    className={`py-2 px-3 rounded-lg border-2 transition-all text-sm font-medium ${
+                      (profile as any).header_alignment === align
+                        ? 'border-[#0099FF] bg-[#0099FF] text-white'
+                        : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    {align === 'left' ? 'Gauche' : align === 'center' ? 'Centre' : 'Droite'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Cover Border Radius */}
+            <div className="flex flex-col gap-3">
+              <label className="text-sm font-medium text-gray-700">Bordures de la couverture</label>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => update('cover_border_radius' as any, true)}
+                  className={`flex-1 py-2 px-3 rounded-lg border-2 transition-all text-sm font-medium ${
+                    (profile as any).cover_border_radius !== false
+                      ? 'border-[#0099FF] bg-[#0099FF] text-white'
+                      : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  Arrondies
+                </button>
+                <button
+                  onClick={() => update('cover_border_radius' as any, false)}
+                  className={`flex-1 py-2 px-3 rounded-lg border-2 transition-all text-sm font-medium ${
+                    (profile as any).cover_border_radius === false
+                      ? 'border-[#0099FF] bg-[#0099FF] text-white'
+                      : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  Carrées
+                </button>
+              </div>
+            </div>
+          </div>
+
           <SaveButton full />
         </div>
       )}

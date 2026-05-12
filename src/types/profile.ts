@@ -44,6 +44,8 @@ export interface Profile {
   role: 'user' | 'admin'
   created_at: string
   updated_at: string
+  cover_border_radius?: boolean
+  header_alignment?: 'left' | 'center' | 'right'
 }
 
 export type SubscriptionType = 'free' | 'premium' | 'lifetime'

@@ -123,32 +123,40 @@ export function PublicProfile({ profile, showBranding }: PublicProfileProps) {
         <motion.div variants={container} initial="hidden" animate="show" className="flex flex-col pt-14 pb-28">
 
           {/* Identity */}
-          <motion.div variants={item} className="text-center px-6 pb-3 pt-1">
-            {(profile.first_name || profile.last_name || profile.full_name) && (
-              <h1 className="text-[26px] font-extrabold text-gray-900 leading-tight">
-                {profile.first_name || profile.last_name
-                  ? [profile.first_name, profile.last_name].filter(Boolean).join(' ')
-                  : profile.full_name}
-              </h1>
-            )}
-            {profile.job_title && (
-              <div className="flex items-center justify-center gap-1.5 mt-2">
-                <span
-                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold"
-                  style={{ backgroundColor: accent, color: textColor }}
-                >
-                  <Briefcase className="w-3 h-3 flex-shrink-0" />
-                  {profile.job_title}
-                </span>
-              </div>
-            )}
-            {profile.company && (
-              <p className="flex items-center justify-center gap-1.5 text-base font-bold text-gray-800 mt-2">
-                <Building2 className="w-4 h-4 flex-shrink-0" style={{ color: accent }} />
-                {profile.company}
-              </p>
-            )}
-          </motion.div>
+          {(profile.first_name || profile.last_name || profile.full_name || profile.job_title || profile.company) && (() => {
+            const headerAlignment = (profile as any).header_alignment || 'center'
+            const alignmentClass = headerAlignment === 'left' ? 'text-left' : headerAlignment === 'right' ? 'text-right' : 'text-center'
+            const justifyClass = headerAlignment === 'left' ? 'justify-start' : headerAlignment === 'right' ? 'justify-end' : 'justify-center'
+
+            return (
+              <motion.div variants={item} className={`${alignmentClass} px-6 pb-3 pt-1`}>
+                {(profile.first_name || profile.last_name || profile.full_name) && (
+                  <h1 className="text-[26px] font-extrabold text-gray-900 leading-tight">
+                    {profile.first_name || profile.last_name
+                      ? [profile.first_name, profile.last_name].filter(Boolean).join(' ')
+                      : profile.full_name}
+                  </h1>
+                )}
+                {profile.job_title && (
+                  <div className={`flex items-center ${justifyClass} gap-1.5 mt-2`}>
+                    <span
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold"
+                      style={{ backgroundColor: accent, color: textColor }}
+                    >
+                      <Briefcase className="w-3 h-3 flex-shrink-0" />
+                      {profile.job_title}
+                    </span>
+                  </div>
+                )}
+                {profile.company && (
+                  <p className={`flex items-center ${justifyClass} gap-1.5 text-base font-bold text-gray-800 mt-2`}>
+                    <Building2 className="w-4 h-4 flex-shrink-0" style={{ color: accent }} />
+                    {profile.company}
+                  </p>
+                )}
+              </motion.div>
+            )
+          })()}
 
           {/* Quick action circles */}
           {quickActions.length > 0 && (
@@ -190,16 +198,16 @@ export function PublicProfile({ profile, showBranding }: PublicProfileProps) {
                 <span className="text-sm font-semibold text-gray-600">Contacts & liens</span>
                 <div className="flex items-center bg-gray-100 rounded-lg p-0.5">
                   <button
-                    onClick={() => setViewMode('grid')}
-                    className={`p-1.5 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-white shadow-sm text-gray-700' : 'text-gray-400'}`}
-                  >
-                    <LayoutGrid size={15} />
-                  </button>
-                  <button
                     onClick={() => setViewMode('list')}
                     className={`p-1.5 rounded-md transition-colors ${viewMode === 'list' ? 'bg-white shadow-sm text-gray-700' : 'text-gray-400'}`}
                   >
                     <List size={15} />
+                  </button>
+                  <button
+                    onClick={() => setViewMode('grid')}
+                    className={`p-1.5 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-white shadow-sm text-gray-700' : 'text-gray-400'}`}
+                  >
+                    <LayoutGrid size={15} />
                   </button>
                 </div>
               </div>

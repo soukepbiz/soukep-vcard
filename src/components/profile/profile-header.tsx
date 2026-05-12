@@ -13,29 +13,25 @@ function resolveAccent(color: string | null) {
 
 export function ProfileHeader({ profile }: ProfileHeaderProps) {
   const accent = resolveAccent(profile.accent_color)
+  const coverRadius = (profile as any).cover_border_radius !== false ? 'rounded-b-3xl' : ''
 
   return (
     <div className="relative">
       {/* Cover — top full-width, only bottom corners rounded */}
       <div
-        className="h-44 w-full overflow-hidden rounded-b-3xl relative"
+        className={`h-44 w-full overflow-hidden relative ${coverRadius}`}
         style={
           profile.cover_url
-            ? undefined
+            ? {
+                backgroundImage: `url('${profile.cover_url}')`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+              }
             : { background: `linear-gradient(135deg, ${accent} 0%, ${accent}99 50%, ${accent}44 100%)` }
         }
       >
-        {profile.cover_url && (
-          <Image
-            src={profile.cover_url}
-            alt="Bannière"
-            fill
-            className="object-cover object-center"
-            priority
-            sizes="(max-width: 768px) 100vw, 448px"
-          />
-        )}
-        <div className="absolute inset-0 rounded-b-3xl bg-gradient-to-t from-black/15 to-transparent" />
+        <div className={`absolute inset-0 ${coverRadius} bg-gradient-to-t from-black/15 to-transparent`} />
       </div>
 
       {/* Avatar overlapping cover */}
