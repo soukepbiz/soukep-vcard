@@ -6,7 +6,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Soukep vCard — Carte de visite digitale",
   description: "Créez votre carte de visite digitale professionnelle et partagez-la en un clic.",
-  icons: { icon: '/logo-st.png', apple: '/logo-st.png' },
+  icons: { icon: '/favicon.png', apple: '/favicon.png' },
 };
 
 export default function RootLayout({
