@@ -8,22 +8,22 @@ import { BRAND_PATHS } from '@/lib/brand-icons'
 import { Globe, Link as LinkIcon, Pencil, Check, X } from 'lucide-react'
 
 const PLATFORMS = [
-  { id: 'whatsapp',   label: 'WhatsApp',   color: '#25D366', placeholder: 'https://wa.me/33600000000' },
-  { id: 'linkedin',   label: 'LinkedIn',   color: '#0A66C2', placeholder: 'https://linkedin.com/in/votre-profil' },
-  { id: 'instagram',  label: 'Instagram',  color: '#E1306C', placeholder: 'https://instagram.com/votre-compte' },
-  { id: 'facebook',   label: 'Facebook',   color: '#1877F2', placeholder: 'https://facebook.com/votre-page' },
-  { id: 'tiktok',     label: 'TikTok',     color: '#010101', placeholder: 'https://tiktok.com/@votre-compte' },
-  { id: 'twitter',    label: 'X (Twitter)',color: '#000000', placeholder: 'https://x.com/votre-compte' },
-  { id: 'telegram',   label: 'Telegram',   color: '#26A5E4', placeholder: 'https://t.me/votre-compte' },
-  { id: 'snapchat',   label: 'Snapchat',   color: '#FFC300', placeholder: 'https://snapchat.com/add/votre-compte' },
-  { id: 'youtube',    label: 'YouTube',    color: '#FF0000', placeholder: 'https://youtube.com/@votre-chaine' },
-  { id: 'github',     label: 'GitHub',     color: '#181717', placeholder: 'https://github.com/votre-profil' },
-  { id: 'pinterest',  label: 'Pinterest',  color: '#BD081C', placeholder: 'https://pinterest.com/votre-compte' },
-  { id: 'discord',    label: 'Discord',    color: '#5865F2', placeholder: 'https://discord.gg/votre-serveur' },
-  { id: 'twitch',     label: 'Twitch',     color: '#9146FF', placeholder: 'https://twitch.tv/votre-chaine' },
-  { id: 'spotify',    label: 'Spotify',    color: '#1DB954', placeholder: 'https://open.spotify.com/artist/...' },
-  { id: 'website',    label: 'Site Web',   color: '#0099FF', placeholder: 'https://votre-site.com' },
-  { id: 'custom',     label: 'Lien perso', color: '#6B7280', placeholder: 'https://...' },
+  { id: 'whatsapp',   label: 'WhatsApp',   color: '#25D366', prefix: 'https://wa.me/',                    placeholder: '33600000000' },
+  { id: 'linkedin',   label: 'LinkedIn',   color: '#0A66C2', prefix: 'https://linkedin.com/in/',          placeholder: 'votre-profil' },
+  { id: 'instagram',  label: 'Instagram',  color: '#E1306C', prefix: 'https://instagram.com/',            placeholder: 'votre-compte' },
+  { id: 'facebook',   label: 'Facebook',   color: '#1877F2', prefix: 'https://facebook.com/',             placeholder: 'votre-page' },
+  { id: 'tiktok',     label: 'TikTok',     color: '#010101', prefix: 'https://tiktok.com/@',              placeholder: 'votre-compte' },
+  { id: 'twitter',    label: 'X (Twitter)',color: '#000000', prefix: 'https://x.com/',                    placeholder: 'votre-compte' },
+  { id: 'telegram',   label: 'Telegram',   color: '#26A5E4', prefix: 'https://t.me/',                     placeholder: 'votre-compte' },
+  { id: 'snapchat',   label: 'Snapchat',   color: '#FFC300', prefix: 'https://snapchat.com/add/',         placeholder: 'votre-compte' },
+  { id: 'youtube',    label: 'YouTube',    color: '#FF0000', prefix: 'https://youtube.com/@',             placeholder: 'votre-chaine' },
+  { id: 'github',     label: 'GitHub',     color: '#181717', prefix: 'https://github.com/',               placeholder: 'votre-profil' },
+  { id: 'pinterest',  label: 'Pinterest',  color: '#BD081C', prefix: 'https://pinterest.com/',            placeholder: 'votre-compte' },
+  { id: 'discord',    label: 'Discord',    color: '#5865F2', prefix: 'https://discord.gg/',               placeholder: 'votre-serveur' },
+  { id: 'twitch',     label: 'Twitch',     color: '#9146FF', prefix: 'https://twitch.tv/',                placeholder: 'votre-chaine' },
+  { id: 'spotify',    label: 'Spotify',    color: '#1DB954', prefix: 'https://open.spotify.com/artist/',  placeholder: 'identifiant' },
+  { id: 'website',    label: 'Site Web',   color: '#0099FF', prefix: 'https://',                          placeholder: 'votre-site.com' },
+  { id: 'custom',     label: 'Lien perso', color: '#6B7280', prefix: 'https://',                          placeholder: 'exemple.com' },
 ]
 
 
@@ -83,7 +83,7 @@ export function SocialLinksEditor({ links, onChange, maxLinks }: SocialLinksEdit
     const p = PLATFORMS.find((p) => p.id === platformId)!
     setAddingPlatform(platformId)
     setNewTitle(p.label)
-    setNewUrl('')
+    setNewUrl(p.prefix)
   }
 
   function confirmAdd() {
@@ -145,13 +145,18 @@ export function SocialLinksEditor({ links, onChange, maxLinks }: SocialLinksEdit
               onChange={(e) => setNewTitle(e.target.value)}
               className="h-10 w-full rounded-xl border border-[#B3DBFF] bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#0099FF]"
             />
-            <input
-              type="url"
-              placeholder={p.placeholder}
-              value={newUrl}
-              onChange={(e) => setNewUrl(e.target.value)}
-              className="h-10 w-full rounded-xl border border-[#B3DBFF] bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#0099FF]"
-            />
+            <div className="flex items-center border border-[#B3DBFF] rounded-xl overflow-hidden bg-white focus-within:ring-2 focus-within:ring-[#0099FF]">
+              <span className="px-3 text-xs text-gray-400 font-mono whitespace-nowrap bg-gray-50 border-r border-[#B3DBFF] h-10 flex items-center shrink-0">
+                {p.prefix}
+              </span>
+              <input
+                type="text"
+                placeholder={p.placeholder}
+                value={newUrl.startsWith(p.prefix) ? newUrl.slice(p.prefix.length) : newUrl}
+                onChange={(e) => setNewUrl(p.prefix + e.target.value)}
+                className="h-10 flex-1 bg-white px-3 text-sm focus:outline-none min-w-0"
+              />
+            </div>
             <div className="flex gap-2">
               <button type="button" onClick={confirmAdd} disabled={!newUrl}
                 className="flex-1 h-9 bg-[#0099FF] disabled:opacity-50 text-white text-sm font-semibold rounded-xl hover:bg-[#0077CC] transition-colors">
