@@ -115,9 +115,9 @@ export function PublicProfile({ profile, showBranding }: PublicProfileProps) {
   const hasContacts = phones.length > 0 || emails.length > 0 || links.length > 0
 
   return (
-    <div className="relative" style={{ backgroundColor: '#FFFFFF' }}>
+    <div className="relative max-w-md mx-auto" style={{ backgroundColor: '#FFFFFF' }}>
       <BgPattern accent={accent} />
-      <div className="relative max-w-md mx-auto bg-white min-h-screen">
+      <div className="relative min-h-screen">
         <ProfileHeader profile={profile} />
 
         <motion.div variants={container} initial="hidden" animate="show" className="flex flex-col pt-16 pb-28">

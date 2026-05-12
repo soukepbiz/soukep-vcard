@@ -27,6 +27,7 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
                 backgroundSize: 'contain',
                 backgroundPosition: 'center',
                 backgroundRepeat: 'no-repeat',
+                backgroundColor: accent,
               }
             : { background: `linear-gradient(135deg, ${accent} 0%, ${accent}99 50%, ${accent}44 100%)` }
         }
