@@ -133,11 +133,9 @@ export function PublicProfile({ profile, showBranding }: PublicProfileProps) {
             </motion.div>
           )}
 
-          {profile.bio && profile.location && <div className="h-px bg-gray-100 mx-5" />}
-
           {/* Location — standalone */}
           {profile.location && (
-            <motion.div variants={item} className="px-5 py-4 flex items-center gap-2">
+            <motion.div variants={item} className={`px-5 flex items-center gap-2 ${profile.bio ? 'pt-0 pb-4' : 'py-4'}`}>
               <MapPin className="w-5 h-5 flex-shrink-0" style={{ color: accent }} />
               <span className="text-base font-semibold text-gray-700">{profile.location}</span>
             </motion.div>

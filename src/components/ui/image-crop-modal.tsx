@@ -2,11 +2,11 @@
 
 import { useState, useCallback } from 'react'
 import Cropper, { type Area } from 'react-easy-crop'
-import { X, Check, ZoomIn, ZoomOut } from 'lucide-react'
+import { X, Check, ZoomIn, ZoomOut, Grid3X3 } from 'lucide-react'
 
 interface ImageCropModalProps {
   imageSrc: string
-  aspect: number        // 1 for avatar, 3 for cover
+  aspect: number
   onConfirm: (croppedBlob: Blob) => void
   onCancel: () => void
   shape?: 'round' | 'rect'
@@ -18,7 +18,8 @@ async function getCroppedBlob(imageSrc: string, pixelCrop: Area): Promise<Blob> 
     i.crossOrigin = 'anonymous'
     i.onload = () => res(i)
     i.onerror = rej
-    i.src = imageSrc
+    // Add cache-busting to bypass CORS cache on Supabase CDN
+    i.src = imageSrc.includes('?') ? imageSrc + '&cb=' + Date.now() : imageSrc + '?cb=' + Date.now()
   })
   const canvas = document.createElement('canvas')
   canvas.width = pixelCrop.width
@@ -28,9 +29,14 @@ async function getCroppedBlob(imageSrc: string, pixelCrop: Area): Promise<Blob> 
   return new Promise((res, rej) => canvas.toBlob((b) => b ? res(b) : rej(new Error('canvas empty')), 'image/jpeg', 0.92))
 }
 
+const ZOOM_STEP = 0.1
+const ZOOM_MIN = 1
+const ZOOM_MAX = 3
+
 export function ImageCropModal({ imageSrc, aspect, onConfirm, onCancel, shape = 'rect' }: ImageCropModalProps) {
   const [crop, setCrop] = useState({ x: 0, y: 0 })
   const [zoom, setZoom] = useState(1)
+  const [showGrid, setShowGrid] = useState(true)
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null)
   const [saving, setSaving] = useState(false)
 
@@ -49,15 +55,28 @@ export function ImageCropModal({ imageSrc, aspect, onConfirm, onCancel, shape = 
     }
   }
 
+  function zoomIn() { setZoom((z) => Math.min(ZOOM_MAX, +(z + ZOOM_STEP).toFixed(2))) }
+  function zoomOut() { setZoom((z) => Math.max(ZOOM_MIN, +(z - ZOOM_STEP).toFixed(2))) }
+
   return (
     <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm">
       <div className="w-full sm:max-w-sm bg-white rounded-t-3xl sm:rounded-3xl overflow-hidden shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between px-5 pt-5 pb-3">
           <h3 className="font-bold text-gray-900 text-base">Cadrer l&apos;image</h3>
-          <button onClick={onCancel} className="p-1.5 text-gray-400 hover:text-gray-700 transition-colors">
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setShowGrid((g) => !g)}
+              title={showGrid ? 'Masquer la grille' : 'Afficher la grille'}
+              className={`p-1.5 rounded-lg transition-colors ${showGrid ? 'bg-[#E6F4FF] text-[#0099FF]' : 'text-gray-400 hover:text-gray-700'}`}
+            >
+              <Grid3X3 className="w-4 h-4" />
+            </button>
+            <button onClick={onCancel} className="p-1.5 text-gray-400 hover:text-gray-700 transition-colors">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Crop area */}
@@ -68,7 +87,7 @@ export function ImageCropModal({ imageSrc, aspect, onConfirm, onCancel, shape = 
             zoom={zoom}
             aspect={aspect}
             cropShape={shape}
-            showGrid={false}
+            showGrid={showGrid}
             onCropChange={setCrop}
             onZoomChange={setZoom}
             onCropComplete={onCropComplete}
@@ -79,16 +98,30 @@ export function ImageCropModal({ imageSrc, aspect, onConfirm, onCancel, shape = 
           />
         </div>
 
-        {/* Zoom slider */}
+        {/* Zoom controls */}
         <div className="flex items-center gap-3 px-5 py-3">
-          <ZoomOut className="w-4 h-4 text-gray-400 flex-shrink-0" />
+          <button
+            type="button"
+            onClick={zoomOut}
+            disabled={zoom <= ZOOM_MIN}
+            className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex-shrink-0"
+          >
+            <ZoomOut className="w-4 h-4" />
+          </button>
           <input
-            type="range" min={1} max={3} step={0.01}
+            type="range" min={ZOOM_MIN} max={ZOOM_MAX} step={0.01}
             value={zoom}
             onChange={(e) => setZoom(Number(e.target.value))}
             className="flex-1 accent-[#0099FF]"
           />
-          <ZoomIn className="w-4 h-4 text-gray-400 flex-shrink-0" />
+          <button
+            type="button"
+            onClick={zoomIn}
+            disabled={zoom >= ZOOM_MAX}
+            className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex-shrink-0"
+          >
+            <ZoomIn className="w-4 h-4" />
+          </button>
         </div>
 
         {/* Actions */}

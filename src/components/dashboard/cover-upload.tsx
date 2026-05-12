@@ -4,7 +4,7 @@ import { useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Image from 'next/image'
 import { ImageCropModal } from '@/components/ui/image-crop-modal'
-import { ImageIcon, Pencil } from 'lucide-react'
+import { ImageIcon, Pencil, RefreshCw } from 'lucide-react'
 
 interface CoverUploadProps {
   userId: string
@@ -14,21 +14,27 @@ interface CoverUploadProps {
 
 export function CoverUpload({ userId, currentUrl, onUpload }: CoverUploadProps) {
   const [uploading, setUploading] = useState(false)
-  const [rawSrc, setRawSrc] = useState<string | null>(null)
+  const [cropSrc, setCropSrc] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const supabase = createClient()
 
+  // New file selected → read as data URL → open crop modal
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
     const reader = new FileReader()
-    reader.onload = () => setRawSrc(reader.result as string)
+    reader.onload = () => setCropSrc(reader.result as string)
     reader.readAsDataURL(file)
     e.target.value = ''
   }
 
+  // "Recadrer" clicked on existing image → open crop modal with current URL directly
+  function handleRecrop() {
+    if (currentUrl) setCropSrc(currentUrl)
+  }
+
   async function handleCropConfirm(blob: Blob) {
-    setRawSrc(null)
+    setCropSrc(null)
     setUploading(true)
     const path = `${userId}/${Date.now()}.jpg`
     const { error } = await supabase.storage.from('covers').upload(path, blob, { upsert: true, contentType: 'image/jpeg' })
@@ -41,9 +47,10 @@ export function CoverUpload({ userId, currentUrl, onUpload }: CoverUploadProps) 
 
   return (
     <>
-      <div className="relative w-full group">
+      <div className="relative w-full">
+        {/* Cover preview / upload zone */}
         <div
-          className="relative w-full h-32 rounded-2xl overflow-hidden bg-gradient-to-r from-[#E6F4FF] to-[#B3DBFF] border-2 border-dashed border-gray-200 hover:border-[#33ADFF] transition-colors cursor-pointer"
+          className="relative w-full h-32 rounded-2xl overflow-hidden bg-gradient-to-r from-[#E6F4FF] to-[#B3DBFF] border-2 border-dashed border-gray-200 hover:border-[#33ADFF] transition-colors cursor-pointer group"
           onClick={() => inputRef.current?.click()}
         >
           {currentUrl ? (
@@ -55,9 +62,11 @@ export function CoverUpload({ userId, currentUrl, onUpload }: CoverUploadProps) 
               <span className="text-[11px] text-gray-300">Cliquez pour choisir</span>
             </div>
           )}
-          <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-            <span className="text-white text-sm font-semibold">Changer la bannière</span>
-          </div>
+          {!currentUrl && (
+            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <span className="text-white text-sm font-semibold">Choisir une image</span>
+            </div>
+          )}
           {uploading && (
             <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
               <svg className="animate-spin w-6 h-6 text-white" fill="none" viewBox="0 0 24 24">
@@ -68,28 +77,38 @@ export function CoverUpload({ userId, currentUrl, onUpload }: CoverUploadProps) 
           )}
         </div>
 
-        {/* Recadrer button when image exists */}
+        {/* Action buttons when image exists */}
         {currentUrl && !uploading && (
-          <button
-            type="button"
-            onClick={() => inputRef.current?.click()}
-            className="absolute top-2 right-2 flex items-center gap-1.5 px-2.5 py-1.5 bg-black/50 hover:bg-black/70 text-white text-xs font-semibold rounded-lg backdrop-blur-sm transition-colors"
-          >
-            <Pencil className="w-3 h-3" />
-            Recadrer
-          </button>
+          <div className="absolute top-2 right-2 flex gap-1.5">
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); handleRecrop() }}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 bg-black/55 hover:bg-black/75 text-white text-xs font-semibold rounded-lg backdrop-blur-sm transition-colors"
+            >
+              <Pencil className="w-3 h-3" />
+              Recadrer
+            </button>
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); inputRef.current?.click() }}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 bg-black/55 hover:bg-black/75 text-white text-xs font-semibold rounded-lg backdrop-blur-sm transition-colors"
+            >
+              <RefreshCw className="w-3 h-3" />
+              Changer
+            </button>
+          </div>
         )}
 
         <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
       </div>
 
-      {rawSrc && (
+      {cropSrc && (
         <ImageCropModal
-          imageSrc={rawSrc}
+          imageSrc={cropSrc}
           aspect={3}
           shape="rect"
           onConfirm={handleCropConfirm}
-          onCancel={() => setRawSrc(null)}
+          onCancel={() => setCropSrc(null)}
         />
       )}
     </>
