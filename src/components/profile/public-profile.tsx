@@ -114,7 +114,7 @@ export function PublicProfile({ profile, showBranding }: PublicProfileProps) {
       <div className="relative max-w-md mx-auto bg-white min-h-screen">
         <ProfileHeader profile={profile} />
 
-        <motion.div variants={container} initial="hidden" animate="show" className="flex flex-col pt-14">
+        <motion.div variants={container} initial="hidden" animate="show" className="flex flex-col pt-14 pb-28">
 
           {/* Identity */}
           <motion.div variants={item} className="text-center px-6 pb-3 pt-1">
